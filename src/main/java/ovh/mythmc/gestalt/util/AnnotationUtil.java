@@ -9,7 +9,8 @@ public final class AnnotationUtil {
 
     public static void triggerAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> annotation) {
         Object[] params = Gestalt.get().getParamsRegistry().getParameters(clazz);
-        System.out.println("Class " + clazz.getName() + " params: " + params.toString());
+        if (params != null)
+            System.out.println("Class " + clazz.getName() + " params: " + params.toString());
 
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation)) {
