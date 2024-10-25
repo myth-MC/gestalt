@@ -12,6 +12,7 @@ public final class AnnotationUtil {
             if (method.isAnnotationPresent(annotation)) {
                 try {
                     Object[] params = Gestalt.get().getParamsRegistry().getParameters(clazz);
+                    System.out.println("Method " + method.getName() + " params: " + params);
                     if (params != null) {
                         Class<?>[] paramClasses = new Class[params.length];
                         for (int i = 0; i < params.length; i++) {
