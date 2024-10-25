@@ -4,14 +4,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import ovh.mythmc.gestalt.Gestalt;
 
-@SuppressWarnings("unused")
 public class BukkitGestaltBuilder {
 
     public static Builder builder() {
         return new Builder();
     }
 
-    private static class Builder {
+    public static class Builder {
 
         private JavaPlugin plugin;
 
