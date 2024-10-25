@@ -3,38 +3,25 @@ package ovh.mythmc.gestalt.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import ovh.mythmc.gestalt.Gestalt;
+
 public final class AnnotationUtil {
 
     public static void triggerAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> annotation) {
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation)) {
-                System.out.println("funciona");
                 try {
-                    method.invoke(clazz.getDeclaredConstructor().newInstance());
+                    Object[] params = Gestalt.get().getParamsRegistry().getParameters(clazz);
+                    Class<?>[] paramClasses = new Class[params.length];
+                    for (int i = 0; i < params.length; i++) {
+                        paramClasses[i] = params[i].getClass();
+                    }
+                    method.invoke(clazz.getDeclaredConstructor(paramClasses).newInstance(params));
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
         }
     }
 
-    /*
-    public static Class<?> findAnnotationClass(IFeature instance, Class<? extends Annotation> annotation) {
-        Class<?> annotatedClass = null;
-
-        Class<?> cl = instance.getClass();
-        while (cl != null) {
-            if (!cl.isAnnotationPresent(annotation)) {
-                cl = cl.getSuperclass();
-                continue;
-            }
-
-            annotatedClass = cl;
-        }
-
-        return annotatedClass;
-    }
-         */
-    
 }

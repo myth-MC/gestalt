@@ -17,10 +17,13 @@ import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
 import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
 import ovh.mythmc.gestalt.exceptions.NotInitializedException;
+import ovh.mythmc.gestalt.features.FeatureParamsRegistry;
 import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.util.AnnotationUtil;
 
 public class Gestalt {
+
+    private final FeatureParamsRegistry paramsRegistry = new FeatureParamsRegistry();
 
     private final String serverVersion;
 
@@ -31,6 +34,10 @@ public class Gestalt {
     public Gestalt(String serverVersion, boolean overrideInstance) {
         this.serverVersion = serverVersion;
         this.overrideInstance = overrideInstance;
+    }
+
+    public FeatureParamsRegistry getParamsRegistry() {
+        return paramsRegistry;
     }
 
     public String getServerVersion() {
@@ -68,6 +75,11 @@ public class Gestalt {
             AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
             classMap.put(clazz, false);
         });
+    }
+
+    public void register(final @NotNull Class<?> clazz, final @NotNull Object[] params) {
+        register(clazz);
+        getParamsRegistry().register(clazz, params);
     }
 
     public void unregister(final @NotNull Class<?>... classes) {
