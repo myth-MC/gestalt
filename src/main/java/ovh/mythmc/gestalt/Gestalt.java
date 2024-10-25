@@ -17,13 +17,15 @@ import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
 import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
 import ovh.mythmc.gestalt.exceptions.NotInitializedException;
-import ovh.mythmc.gestalt.features.FeatureParamsRegistry;
+import ovh.mythmc.gestalt.features.FeatureConstructorParams;
+import ovh.mythmc.gestalt.features.FeatureConstructorParamsRegistry;
 import ovh.mythmc.gestalt.features.FeaturePriority;
+import ovh.mythmc.gestalt.features.GestaltFeature;
 import ovh.mythmc.gestalt.util.AnnotationUtil;
 
 public class Gestalt {
 
-    private final FeatureParamsRegistry paramsRegistry = new FeatureParamsRegistry();
+    private final FeatureConstructorParamsRegistry paramsRegistry = new FeatureConstructorParamsRegistry();
 
     private final String serverVersion;
 
@@ -36,7 +38,7 @@ public class Gestalt {
         this.overrideInstance = overrideInstance;
     }
 
-    public FeatureParamsRegistry getParamsRegistry() {
+    public FeatureConstructorParamsRegistry getParamsRegistry() {
         return paramsRegistry;
     }
 
@@ -77,9 +79,17 @@ public class Gestalt {
         });
     }
 
-    public void register(final @NotNull Class<?> clazz, final @NotNull Object... params) {
+    public void register(final @NotNull Class<?> clazz, final @NotNull FeatureConstructorParams params) {
         getParamsRegistry().register(clazz, params);
         register(clazz);
+    }
+
+    public void register(final @NotNull GestaltFeature feature) {
+        if (feature.getConstructorParams() != null) {
+            getParamsRegistry().register(feature.getFeatureClass(), feature.getConstructorParams());
+        }
+
+        register(feature.getFeatureClass());
     }
 
     public void unregister(final @NotNull Class<?>... classes) {

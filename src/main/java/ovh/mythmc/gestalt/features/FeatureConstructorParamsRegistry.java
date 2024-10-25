@@ -7,15 +7,15 @@ import javax.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class FeatureParamsRegistry {
+public final class FeatureConstructorParamsRegistry {
 
-    private final Map<String, Object[]> paramsRegistry = new HashMap<>();
+    private final Map<String, FeatureConstructorParams> paramsRegistry = new HashMap<>();
 
-    public void register(final @NotNull String className, final @Nullable Object... params) {
+    public void register(final @NotNull String className, final @Nullable FeatureConstructorParams params) {
         paramsRegistry.put(className, params);
     }
 
-    public void register(final @NotNull Class<?> clazz, final @Nullable Object... params) {
+    public void register(final @NotNull Class<?> clazz, final @Nullable FeatureConstructorParams params) {
         register(clazz.getName(), params);
     }
 
@@ -27,14 +27,14 @@ public final class FeatureParamsRegistry {
         unregister(clazz.getName());
     }
 
-    public Object[] getParameters(final @NotNull String className) {
+    public FeatureConstructorParams getParameters(final @NotNull String className) {
         if (!paramsRegistry.containsKey(className))
             return null;
             
         return paramsRegistry.get(className);
     }
 
-    public Object[] getParameters(final @NotNull Class<?> clazz) {
+    public FeatureConstructorParams getParameters(final @NotNull Class<?> clazz) {
         return getParameters(clazz.getName());
     }
     
