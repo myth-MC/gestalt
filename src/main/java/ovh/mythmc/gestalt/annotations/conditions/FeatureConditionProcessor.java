@@ -16,7 +16,6 @@ public final class FeatureConditionProcessor {
         try {
             return booleanCondition(clazz) && versionCondition(clazz);
         } catch (Exception e) {
-            System.out.println(e);
             e.printStackTrace();
         }
 
@@ -28,10 +27,8 @@ public final class FeatureConditionProcessor {
         
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            System.out.println("(b) checking method " + method.getName() + " - class " + clazz.getName());
             if (method.isAnnotationPresent(FeatureConditionBoolean.class)) {
                 b = (boolean) method.invoke(clazz.getDeclaredConstructor().newInstance());
-                System.out.println("(b) " + b);
             } else {
                 return true;
             }
@@ -45,14 +42,12 @@ public final class FeatureConditionProcessor {
         
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            System.out.println("(ver) checking method " + method.getName() + " - class " + clazz.getName());
             if (method.isAnnotationPresent(FeatureConditionVersion.class)) {
                 Collection<?> objectList = (Collection<?>) method.invoke(clazz.getDeclaredConstructor().newInstance());
                 versions = objectList.stream()
                     .filter(o -> o instanceof String)
                     .map(o -> (String) o)
                     .collect(Collectors.toList());
-                System.out.println(versions);
             }
         }
 
