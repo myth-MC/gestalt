@@ -28,6 +28,9 @@ public final class FeatureParamsRegistry {
     }
 
     public Object[] getParameters(final @NotNull String className) {
+        if (!paramsRegistry.containsKey(className))
+            return null;
+            
         System.out.println("Getting params for class " + className + " -> " + paramsRegistry.get(className));
         return paramsRegistry.get(className);
     }

@@ -79,6 +79,7 @@ public class Gestalt {
 
     public void register(final @NotNull Class<?> clazz, final @NotNull Object... params) {
         register(clazz);
+        System.out.println("(Gestalt class) registering " + clazz.getName());
         getParamsRegistry().register(clazz, params);
     }
 
