@@ -28,6 +28,7 @@ public final class FeatureParamsRegistry {
     }
 
     public Object[] getParameters(final @NotNull String className) {
+        System.out.println("Getting params for class " + className + " -> " + paramsRegistry.get(className));
         return paramsRegistry.get(className);
     }
 
