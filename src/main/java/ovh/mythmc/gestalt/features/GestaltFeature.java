@@ -2,8 +2,6 @@ package ovh.mythmc.gestalt.features;
 
 public class GestaltFeature {
 
-    public static Builder builder = new Builder();
-
     private final Class<?> clazz;
 
     private final FeatureConstructorParams params;
@@ -16,6 +14,10 @@ public class GestaltFeature {
     public Class<?> getFeatureClass() { return clazz; }
 
     public FeatureConstructorParams getConstructorParams() { return params; }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static class Builder {
 
