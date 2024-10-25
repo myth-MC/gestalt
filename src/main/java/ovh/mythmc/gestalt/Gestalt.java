@@ -24,10 +24,13 @@ public class Gestalt {
 
     private final String serverVersion;
 
+    private final boolean overrideInstance;
+
     private static Gestalt gestalt;
 
-    public Gestalt(String serverVersion) {
+    public Gestalt(String serverVersion, boolean overrideInstance) {
         this.serverVersion = serverVersion;
+        this.overrideInstance = overrideInstance;
     }
 
     public String getServerVersion() {
@@ -39,7 +42,7 @@ public class Gestalt {
     }
 
     public static void set(final @NotNull Gestalt g) {
-        if (isGestaltInitialized())
+        if (isGestaltInitialized() && !g.overrideInstance)
             throw new AlreadyInitializedException("Gestalt is already initialized! (is Gestalt properly shaded?)");
 
         gestalt = g;
