@@ -13,6 +13,7 @@ public final class FeatureParamsRegistry {
 
     public void register(final @NotNull String className, final @Nullable Object... params) {
         paramsRegistry.put(className, params);
+        System.out.println("Registering class " + className + " with params " + params.toString());
     }
 
     public void register(final @NotNull Class<?> clazz, final @Nullable Object... params) {
