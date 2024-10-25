@@ -78,9 +78,8 @@ public class Gestalt {
     }
 
     public void register(final @NotNull Class<?> clazz, final @NotNull Object... params) {
-        register(clazz);
-        System.out.println("(Gestalt class) registering " + clazz.getName());
         getParamsRegistry().register(clazz, params);
+        register(clazz);
     }
 
     public void unregister(final @NotNull Class<?>... classes) {
@@ -90,6 +89,7 @@ public class Gestalt {
 
             AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
             classMap.remove(clazz);
+            getParamsRegistry().unregister(clazz);
         });
     }
 
