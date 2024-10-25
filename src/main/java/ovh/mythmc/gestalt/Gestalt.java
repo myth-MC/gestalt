@@ -17,6 +17,7 @@ import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
 import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
 import ovh.mythmc.gestalt.exceptions.NotInitializedException;
+import ovh.mythmc.gestalt.features.FeatureClass;
 import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.util.AnnotationUtil;
 
@@ -55,36 +56,47 @@ public class Gestalt {
         return gestalt;
     }
 
-    private final Map<Class<?>, Boolean> classMap = new HashMap<>();
+    private final Map<FeatureClass, Boolean> classMap = new HashMap<>();
 
     public void register(final @NotNull Class<?>... classes) {
         Arrays.stream(classes).forEach(clazz -> {
             if (!clazz.isAnnotationPresent(Feature.class))
                 return;
 
-            if (classMap.containsKey(clazz))
+            if (isRegistered(clazz))
                 return;
 
+            FeatureClass featureClass = new FeatureClass(clazz, null);
             AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
-            classMap.put(clazz, false);
+            classMap.put(featureClass, false);
         });
     }
 
     public void unregister(final @NotNull Class<?>... classes) {
         Arrays.stream(classes).forEach(clazz -> {
-            if (!classMap.containsKey(clazz))
+            if (!isRegistered(clazz))
                 return;
 
-            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
-            classMap.remove(clazz);
+            FeatureClass featureClass = getFeatureClass(clazz);
+
+            AnnotationUtil.triggerAnnotatedMethod(featureClass.clazz(), FeatureShutdown.class);
+            classMap.remove(featureClass);
         });
     }
 
     public void unregisterAllFeatures() {
         for (int i = 0; i < classMap.keySet().size(); i++) {
-            Class<?> clazz = classMap.keySet().stream().toList().get(i);
-            unregister(clazz);
+            FeatureClass featureClass = classMap.keySet().stream().toList().get(i);
+            unregister(featureClass.clazz());
         }
+    }
+
+    public boolean isRegistered(final @NotNull Class<?> clazz) {
+        return getFeatureClass(clazz) != null;
+    }
+
+    public FeatureClass getFeatureClass(final @NotNull Class<?> clazz) {
+        return classMap.keySet().stream().filter(c -> c.clazz().equals(clazz)).toList().get(0);
     }
 
     public void enableFeature(final @NotNull Class<?> clazz) {
