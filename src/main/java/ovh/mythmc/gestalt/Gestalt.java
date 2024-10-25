@@ -77,7 +77,7 @@ public class Gestalt {
         });
     }
 
-    public void register(final @NotNull Class<?> clazz, final @NotNull Object[] params) {
+    public void register(final @NotNull Class<?> clazz, final @NotNull Object... params) {
         register(clazz);
         getParamsRegistry().register(clazz, params);
     }

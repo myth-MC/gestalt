@@ -11,11 +11,11 @@ public final class FeatureParamsRegistry {
 
     private final Map<String, Object[]> paramsRegistry = new HashMap<>();
 
-    public void register(final @NotNull String className, final @Nullable Object[] params) {
+    public void register(final @NotNull String className, final @Nullable Object... params) {
         paramsRegistry.put(className, params);
     }
 
-    public void register(final @NotNull Class<?> clazz, final @Nullable Object[] params) {
+    public void register(final @NotNull Class<?> clazz, final @Nullable Object... params) {
         register(clazz.getName(), params);
     }
 

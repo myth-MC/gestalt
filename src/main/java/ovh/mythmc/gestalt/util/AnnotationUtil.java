@@ -12,11 +12,16 @@ public final class AnnotationUtil {
             if (method.isAnnotationPresent(annotation)) {
                 try {
                     Object[] params = Gestalt.get().getParamsRegistry().getParameters(clazz);
-                    Class<?>[] paramClasses = new Class[params.length];
-                    for (int i = 0; i < params.length; i++) {
-                        paramClasses[i] = params[i].getClass();
+                    if (params != null) {
+                        Class<?>[] paramClasses = new Class[params.length];
+                        for (int i = 0; i < params.length; i++) {
+                            paramClasses[i] = params[i].getClass();
+                        }
+                        method.invoke(clazz.getDeclaredConstructor(paramClasses).newInstance(params));
+                        return;
                     }
-                    method.invoke(clazz.getDeclaredConstructor(paramClasses).newInstance(params));
+
+                    method.invoke(clazz.getDeclaredConstructor().newInstance());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
