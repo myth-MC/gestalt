@@ -16,9 +16,6 @@ public final class FeatureConstructorParamsRegistry {
         for (int i = 0; i < params.getParamTypes().length; i++) {
             System.out.println("Registering parameter TYPE " + params.getParamTypes()[i].getName() + " WITH OBJECT " + params.getParams()[i].getClass());
         }
-        Arrays.stream(params.getParamTypes()).forEach(paramType -> {
-            
-        });
         paramsRegistry.put(className, params);
     }
 

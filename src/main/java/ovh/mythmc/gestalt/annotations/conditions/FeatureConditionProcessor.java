@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import ovh.mythmc.gestalt.Gestalt;
+import ovh.mythmc.gestalt.util.MethodUtil;
 
 public final class FeatureConditionProcessor {
 
@@ -28,7 +29,7 @@ public final class FeatureConditionProcessor {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(FeatureConditionBoolean.class)) {
-                b = (boolean) method.invoke(clazz.getDeclaredConstructor().newInstance());
+                b = (boolean) MethodUtil.invoke(clazz, method);
             } else {
                 return true;
             }
@@ -43,7 +44,7 @@ public final class FeatureConditionProcessor {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(FeatureConditionVersion.class)) {
-                Collection<?> objectList = (Collection<?>) method.invoke(clazz.getDeclaredConstructor().newInstance());
+                Collection<?> objectList = (Collection<?>) MethodUtil.invoke(clazz, method);
                 versions = objectList.stream()
                     .filter(o -> o instanceof String)
                     .map(o -> (String) o)
@@ -61,6 +62,5 @@ public final class FeatureConditionProcessor {
 
         return false;
     }
-
     
 }

@@ -21,7 +21,7 @@ import ovh.mythmc.gestalt.features.FeatureConstructorParams;
 import ovh.mythmc.gestalt.features.FeatureConstructorParamsRegistry;
 import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.features.GestaltFeature;
-import ovh.mythmc.gestalt.util.AnnotationUtil;
+import ovh.mythmc.gestalt.util.MethodUtil;
 
 public class Gestalt {
 
@@ -74,7 +74,7 @@ public class Gestalt {
             if (classMap.containsKey(clazz))
                 return;
 
-            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
+            MethodUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
             classMap.put(clazz, false);
         });
     }
@@ -97,7 +97,7 @@ public class Gestalt {
             if (!classMap.containsKey(clazz))
                 return;
 
-            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
+            MethodUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
             classMap.remove(clazz);
             getParamsRegistry().unregister(clazz);
         });
@@ -116,14 +116,14 @@ public class Gestalt {
 
         if (FeatureConditionProcessor.canBeEnabled(clazz)) {
             classMap.put(clazz, true);
-            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureEnable.class);
+            MethodUtil.triggerAnnotatedMethod(clazz, FeatureEnable.class);
         }
     }
 
     public void disableFeature(final @NotNull Class<?> clazz) {
         if (classMap.get(clazz)) {
             classMap.put(clazz, false);
-            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureDisable.class);
+            MethodUtil.triggerAnnotatedMethod(clazz, FeatureDisable.class);
         }
     }
 
