@@ -16,9 +16,9 @@ public final class FeatureListenerRegistry {
     private final Map<Object, String[]> listenerRegistry = new HashMap<>();
 
     public void register(final @NotNull Object instance) {
-        String[] classes = (String[]) FeatureListenerProcessor.getListeners(instance.getClass()).stream()
+        String[] classes = FeatureListenerProcessor.getListeners(instance.getClass()).stream()
             .map(clazz -> clazz.getName())
-            .toArray();
+            .toArray(String[]::new);
 
         listenerRegistry.put(instance, classes);
     }

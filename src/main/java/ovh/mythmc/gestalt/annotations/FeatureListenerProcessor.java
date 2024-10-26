@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -13,8 +12,8 @@ import ovh.mythmc.gestalt.features.FeatureEvent;
 
 public final class FeatureListenerProcessor {
 
-    public static List<Class<?>> getListeners(final @NotNull Class<?> clazz) {
-        List<Class<?>> listeners = new ArrayList<>();
+    public static ArrayList<Class<?>> getListeners(final @NotNull Class<?> clazz) {
+        ArrayList<Class<?>> listeners = new ArrayList<>();
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class))
                 listeners.add(method.getAnnotation(FeatureListener.class).feature());
