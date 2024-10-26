@@ -15,8 +15,16 @@ public final class FeatureListenerProcessor {
     public static ArrayList<Class<?>> getListeners(final @NotNull Class<?> clazz) {
         ArrayList<Class<?>> listeners = new ArrayList<>();
         for (Method method : clazz.getMethods()) {
-            if (method.isAnnotationPresent(FeatureListener.class))
-                listeners.add(method.getAnnotation(FeatureListener.class).feature());
+            if (method.isAnnotationPresent(FeatureListener.class)) {
+                FeatureListener listener = method.getAnnotation(FeatureListener.class);
+                if (listener.feature() != Feature.class) { // We give priority to defined class instead of group and identifier
+                    listeners.add(method.getAnnotation(FeatureListener.class).feature());
+                    break;
+                }
+
+                Gestalt.get().getByGroupAndIdentifier(listener.group(), listener.identifier()).forEach(listeners::add);
+            }
+                
         }
 
         return listeners;
@@ -26,16 +34,11 @@ public final class FeatureListenerProcessor {
         return getListeners(ckazz) != null;
     }
 
-    public static void call(final @NotNull Gestalt gestalt, final @NotNull Object instance, final @NotNull FeatureEvent event) {
+    public static void call(final @NotNull Object instance, final @NotNull FeatureEvent event) {
         for (Method method : instance.getClass().getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
                 FeatureListener listener = method.getAnnotation(FeatureListener.class);
-                boolean isPresent = false;
-                if (listener.group().isEmpty() || listener.identifier().isEmpty()) {
-                    isPresent = !Arrays.stream(listener.events()).filter(e -> e.equals(event)).toList().isEmpty();
-                } else {
-                    isPresent = !gestalt.getByGroupAndIdentifier(listener.group(), listener.identifier()).isEmpty();
-                }
+                boolean isPresent = !Arrays.stream(listener.events()).filter(e -> e.equals(event)).toList().isEmpty();
             
                 if (isPresent) {
                     try {
