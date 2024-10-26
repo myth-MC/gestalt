@@ -21,12 +21,12 @@ public class GestaltFeature {
 
     public static class Builder {
 
-        private String className;
+        private Class<?> clazz;
 
         private FeatureConstructorParams params;
 
         public Builder featureClass(Class<?> clazz) {
-            this.className = clazz.getName();
+            this.clazz = clazz;
             return this;
         }
 
@@ -36,13 +36,7 @@ public class GestaltFeature {
         }
 
         public GestaltFeature build() {
-            try {
-                return new GestaltFeature(Class.forName(className), params);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            return null;
+            return new GestaltFeature(clazz, params);
         }
 
     }

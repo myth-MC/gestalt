@@ -63,18 +63,18 @@ public class Gestalt {
         return gestalt;
     }
 
-    private final Map<String, Boolean> classMap = new HashMap<>();
+    private final Map<Class<?>, Boolean> classMap = new HashMap<>();
 
     public void register(final @NotNull Class<?>... classes) {
         Arrays.stream(classes).forEach(clazz -> {
-            if (classMap.containsKey(clazz.getName()))
+            if (classMap.containsKey(clazz))
                 return;
 
             if (!clazz.isAnnotationPresent(Feature.class))
                 return;
 
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
-            classMap.put(clazz.getName(), false);
+            classMap.put(clazz, false);
         });
     }
 
@@ -87,48 +87,36 @@ public class Gestalt {
     }
 
     public void unregister(final @NotNull Class<?>... classes) {
-        unregister((String[]) Arrays.stream(classes).map(clazz -> clazz.getName()).toArray());
-    }
-
-    public void unregister(final @NotNull String... classes) {
-        Arrays.stream(classes).forEach(className -> {
-            if (!classMap.containsKey(className))
+        Arrays.stream(classes).forEach(clazz -> {
+            if (!classMap.containsKey(clazz))
                 return;
 
-            MethodUtil.triggerAnnotatedMethod(getFeatureClass(className), FeatureShutdown.class);
-            classMap.remove(className);
-            getParamsRegistry().unregister(className);
+            MethodUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
+            classMap.remove(clazz);
+            getParamsRegistry().unregister(clazz.getName());
         });
     }
 
     public void unregisterAllFeatures() {
         for (int i = 0; i < classMap.keySet().size(); i++) {
-            Class<?> clazz = getFeatureClass(classMap.keySet().stream().toList().get(i));
+            Class<?> clazz = classMap.keySet().stream().toList().get(i);
             unregister(clazz);
         }
     }
 
-    private Class<?> getFeatureClass(final @NotNull String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException ignored) { }
-        
-        return null;
-    }
-
     public void enableFeature(final @NotNull Class<?> clazz) {
-        if (classMap.get(clazz.getName()))
+        if (classMap.get(clazz))
             return;
 
         if (FeatureConditionProcessor.canBeEnabled(clazz)) {
-            classMap.put(clazz.getName(), true);
+            classMap.put(clazz, true);
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureEnable.class);
         }
     }
 
     public void disableFeature(final @NotNull Class<?> clazz) {
-        if (classMap.get(clazz.getName())) {
-            classMap.put(clazz.getName(), false);
+        if (classMap.get(clazz)) {
+            classMap.put(clazz, false);
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureDisable.class);
         }
     }
@@ -151,21 +139,18 @@ public class Gestalt {
 
     public List<Class<?>> getByGroup(final @NotNull String group) {
         return classMap.keySet().stream()
-            .map(className -> getFeatureClass(className))
             .filter(clazz -> clazz.getAnnotation(Feature.class).group().equals(group))
             .collect(Collectors.toList());
     }
 
     public List<Class<?>> getByIdentifier(final @NotNull String identifier) {
         return classMap.keySet().stream()
-            .map(className -> getFeatureClass(className))
             .filter(clazz -> clazz.getAnnotation(Feature.class).identifier().equals(identifier))
             .collect(Collectors.toList());
     }
 
     public List<Class<?>> getByPriority(final @NotNull FeaturePriority priority) {
         return classMap.keySet().stream()
-            .map(className -> getFeatureClass(className))
             .filter(clazz -> clazz.getAnnotation(Feature.class).priority().equals(priority))
             .collect(Collectors.toList());
     }
@@ -188,15 +173,15 @@ public class Gestalt {
     }
 
     public List<Class<?>> getEnabledClasses() {
-        return classMap.entrySet().stream().filter(entry -> entry.getValue()).map(entry -> getFeatureClass(entry.getKey())).collect(Collectors.toList());
+        return classMap.entrySet().stream().filter(entry -> entry.getValue()).map(entry -> entry.getKey()).collect(Collectors.toList());
     }
 
     public List<Class<?>> getDisabledClasses() {
-        return classMap.entrySet().stream().filter(entry -> !entry.getValue()).map(entry -> getFeatureClass(entry.getKey())).collect(Collectors.toList());
+        return classMap.entrySet().stream().filter(entry -> !entry.getValue()).map(entry -> entry.getKey()).collect(Collectors.toList());
     }
 
     public boolean isEnabled(final @NotNull Class<?> clazz) {
-        return classMap.get(clazz.getName());
+        return classMap.get(clazz);
     }
 
 }
