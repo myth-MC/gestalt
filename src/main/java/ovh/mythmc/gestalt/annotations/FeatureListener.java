@@ -13,7 +13,11 @@ import ovh.mythmc.gestalt.features.FeatureEvent;
 @Repeatable(FeatureListener.List.class)
 public @interface FeatureListener {
     
-    Class<?> feature();
+    Class<?> feature() default Feature.class;
+
+    String group() default "";
+
+    String identifier() default "";
 
     FeatureEvent[] events();
 

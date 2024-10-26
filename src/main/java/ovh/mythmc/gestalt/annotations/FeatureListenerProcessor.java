@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.features.FeatureEvent;
 
 public final class FeatureListenerProcessor {
@@ -30,7 +31,13 @@ public final class FeatureListenerProcessor {
         for (Method method : instance.getClass().getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
                 FeatureListener listener = method.getAnnotation(FeatureListener.class);
-                boolean isPresent = !Arrays.stream(listener.events()).filter(e -> e.equals(event)).toList().isEmpty();
+                boolean isPresent = false;
+                if (listener.group().isEmpty() || listener.identifier().isEmpty()) {
+                    isPresent = !Arrays.stream(listener.events()).filter(e -> e.equals(event)).toList().isEmpty();
+                } else {
+                    isPresent = !Gestalt.get().getByGroupAndIdentifier(listener.group(), listener.identifier()).isEmpty();
+                }
+            
                 if (isPresent) {
                     try {
                         method.invoke(instance);
