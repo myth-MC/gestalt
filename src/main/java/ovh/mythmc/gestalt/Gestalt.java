@@ -152,13 +152,13 @@ public class Gestalt {
 
     public List<Class<?>> getByGroup(final @NotNull String group) {
         return classMap.keySet().stream()
-            .filter(clazz -> clazz.getAnnotation(Feature.class).group().equals(group))
+            .filter(clazz -> clazz.getAnnotation(Feature.class).group().equalsIgnoreCase(group))
             .collect(Collectors.toList());
     }
 
     public List<Class<?>> getByIdentifier(final @NotNull String identifier) {
         return classMap.keySet().stream()
-            .filter(clazz -> clazz.getAnnotation(Feature.class).identifier().equals(identifier))
+            .filter(clazz -> clazz.getAnnotation(Feature.class).identifier().equalsIgnoreCase(identifier))
             .collect(Collectors.toList());
     }
 
@@ -170,9 +170,9 @@ public class Gestalt {
 
     public List<Class<?>> getByGroupAndIdentifier(final @NotNull String group, final @NotNull String identifier) {
         return getSortedByPriority().stream()   
-            .filter(clazz -> clazz.getAnnotation(Feature.class).group().equals(group) && 
-                clazz.getAnnotation(Feature.class).identifier().equals(identifier))
-            .toList();
+            .filter(clazz -> clazz.getAnnotation(Feature.class).group().equalsIgnoreCase(group) && 
+                clazz.getAnnotation(Feature.class).identifier().equalsIgnoreCase(identifier))
+            .collect(Collectors.toList());
     }
 
     public List<Class<?>> getSortedByPriority() {
