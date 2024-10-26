@@ -2,9 +2,6 @@ package ovh.mythmc.gestalt.annotations.conditions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -35,19 +32,12 @@ public final class FeatureConditionProcessor {
     }
 
     private static boolean versionCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
-        Collection<String> versions = new ArrayList<>();
-        
-        for (Method method : clazz.getMethods()) {
-            if (method.isAnnotationPresent(FeatureConditionVersion.class)) {
-                Collection<?> objectList = (Collection<?>) MethodUtil.invoke(clazz, method);
-                versions = objectList.stream()
-                    .filter(o -> o instanceof String)
-                    .map(o -> (String) o)
-                    .collect(Collectors.toList());
-            }
-        }
+        String[] versions = null;
 
-        if (versions.isEmpty())
+        if (clazz.isAnnotationPresent(FeatureConditionVersion.class))
+            versions = clazz.getAnnotation(FeatureConditionVersion.class).versions();
+
+        if (versions == null)
             return true;
 
         for (String version : versions) {

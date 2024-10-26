@@ -12,9 +12,6 @@ public final class FeatureConstructorParamsRegistry {
     private final Map<String, FeatureConstructorParams> paramsRegistry = new HashMap<>();
 
     public void register(final @NotNull String className, final @Nullable FeatureConstructorParams params) {
-        for (int i = 0; i < params.getParamTypes().length; i++) {
-            System.out.println("Registering parameter TYPE " + params.getParamTypes()[i].getName() + " WITH OBJECT " + params.getParams()[i].getClass());
-        }
         paramsRegistry.put(className, params);
     }
 
@@ -31,9 +28,6 @@ public final class FeatureConstructorParamsRegistry {
     }
 
     public FeatureConstructorParams getParameters(final @NotNull String className) {
-        if (!paramsRegistry.containsKey(className))
-            return null;
-            
         return paramsRegistry.get(className);
     }
 

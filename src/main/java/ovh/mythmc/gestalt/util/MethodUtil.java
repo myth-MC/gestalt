@@ -15,6 +15,10 @@ public final class MethodUtil {
 
     private static final Map<String, Object> instances = new HashMap<>();
 
+    private MethodUtil() {
+        throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
     public static void triggerAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> annotation) {
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation))
