@@ -15,6 +15,10 @@ public class FeatureConstructorParams {
 
     public Class<?>[] getParamTypes() { return paramTypes; }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
 
         private Object[] params = null;
@@ -26,7 +30,7 @@ public class FeatureConstructorParams {
             return this;
         }
 
-        public Builder paramTypes(Class<?>... paramTypes) {
+        public Builder types(Class<?>... paramTypes) {
             this.paramTypes = paramTypes;
             return this;
         }
