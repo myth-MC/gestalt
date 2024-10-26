@@ -24,15 +24,11 @@ public final class FeatureConditionProcessor {
     }
 
     private static boolean booleanCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
-        boolean b = false;
+        boolean b = true;
         
-        Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(FeatureConditionBoolean.class)) {
+        for (Method method : clazz.getMethods()) {
+            if (method.isAnnotationPresent(FeatureConditionBoolean.class))
                 b = (boolean) MethodUtil.invoke(clazz, method);
-            } else {
-                return true;
-            }
         }
 
         return b;
@@ -41,8 +37,7 @@ public final class FeatureConditionProcessor {
     private static boolean versionCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
         Collection<String> versions = new ArrayList<>();
         
-        Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
+        for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(FeatureConditionVersion.class)) {
                 Collection<?> objectList = (Collection<?>) MethodUtil.invoke(clazz, method);
                 versions = objectList.stream()
