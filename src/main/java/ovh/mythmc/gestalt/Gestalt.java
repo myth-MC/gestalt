@@ -18,6 +18,8 @@ import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
 import ovh.mythmc.gestalt.exceptions.NotInitializedException;
 import ovh.mythmc.gestalt.features.FeatureConstructorParamsRegistry;
+import ovh.mythmc.gestalt.features.FeatureEvent;
+import ovh.mythmc.gestalt.features.FeatureListenerRegistry;
 import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.features.GestaltFeature;
 import ovh.mythmc.gestalt.util.MethodUtil;
@@ -25,6 +27,8 @@ import ovh.mythmc.gestalt.util.MethodUtil;
 public class Gestalt {
 
     private final FeatureConstructorParamsRegistry paramsRegistry = new FeatureConstructorParamsRegistry();
+
+    private final FeatureListenerRegistry listenerRegistry = new FeatureListenerRegistry();
 
     private final String serverVersion;
 
@@ -39,6 +43,10 @@ public class Gestalt {
 
     public FeatureConstructorParamsRegistry getParamsRegistry() {
         return paramsRegistry;
+    }
+
+    public FeatureListenerRegistry getListenerRegistry() {
+        return listenerRegistry;
     }
 
     public String getServerVersion() {
@@ -75,6 +83,8 @@ public class Gestalt {
 
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
             classMap.put(clazz, false);
+
+            getListenerRegistry().call(clazz, FeatureEvent.INITIALIZE);
         });
     }
 
@@ -94,6 +104,7 @@ public class Gestalt {
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
             classMap.remove(clazz);
             getParamsRegistry().unregister(clazz.getName());
+            getListenerRegistry().call(clazz, FeatureEvent.SHUTDOWN);
         });
     }
 
@@ -111,6 +122,7 @@ public class Gestalt {
         if (FeatureConditionProcessor.canBeEnabled(clazz)) {
             classMap.put(clazz, true);
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureEnable.class);
+            getListenerRegistry().call(clazz, FeatureEvent.ENABLE);
         }
     }
 
@@ -118,6 +130,7 @@ public class Gestalt {
         if (classMap.get(clazz)) {
             classMap.put(clazz, false);
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureDisable.class);
+            getListenerRegistry().call(clazz, FeatureEvent.DISABLE);
         }
     }
 
