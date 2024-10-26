@@ -1,5 +1,6 @@
 package ovh.mythmc.gestalt.features;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,12 @@ public final class FeatureConstructorParamsRegistry {
     private final Map<String, FeatureConstructorParams> paramsRegistry = new HashMap<>();
 
     public void register(final @NotNull String className, final @Nullable FeatureConstructorParams params) {
+        for (int i = 0; i < params.getParamTypes().length; i++) {
+            System.out.println("Registering parameter TYPE " + params.getParamTypes()[i].getName() + " WITH OBJECT " + params.getParams()[i].getClass());
+        }
+        Arrays.stream(params.getParamTypes()).forEach(paramType -> {
+            
+        });
         paramsRegistry.put(className, params);
     }
 
