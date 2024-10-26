@@ -12,7 +12,7 @@ import ovh.mythmc.gestalt.annotations.FeatureListenerProcessor;
 
 public final class FeatureListenerRegistry {
 
-    // instancia que escucha, GestaltFeature que escucha (AnvilFeature.class)
+    // Instance that is listening for events, Class name of event that instance listens to
     private final Map<Object, String[]> listenerRegistry = new HashMap<>();
 
     public void register(final @NotNull Object instance) {
@@ -41,7 +41,6 @@ public final class FeatureListenerRegistry {
         return listenerRegistry.containsKey(instance);
     }
 
-    // clases a las que escucha (AnvilFeature.class...)
     public String[] getListeners(final @NotNull Object instance) {
         return listenerRegistry.get(instance);
     }
@@ -70,7 +69,6 @@ public final class FeatureListenerRegistry {
         return hasListeners(clazz.getName());
     }
 
-    // clase que llama al evento, evento
     public void call(final @NotNull Class<?> clazz, final @NotNull FeatureEvent event) {
         getInstances(clazz).forEach(instance -> FeatureListenerProcessor.call(instance, event));
     }

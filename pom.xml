@@ -6,7 +6,7 @@
 
     <groupId>ovh.mythmc</groupId>
     <artifactId>gestalt</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
 
     <build>
         <defaultGoal>clean package</defaultGoal>

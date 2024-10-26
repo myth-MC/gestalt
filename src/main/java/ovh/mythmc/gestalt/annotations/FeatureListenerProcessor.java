@@ -17,7 +17,7 @@ public final class FeatureListenerProcessor {
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
                 FeatureListener listener = method.getAnnotation(FeatureListener.class);
-                if (listener.feature() != Feature.class) { // We give priority to defined class instead of group and identifier
+                if (listener.feature() != Feature.class) { // We give priority to defined class before searching by group and identifier
                     listeners.add(method.getAnnotation(FeatureListener.class).feature());
                     break;
                 }
