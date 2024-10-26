@@ -169,6 +169,7 @@ public class Gestalt {
     }
 
     public List<Class<?>> getByGroupAndIdentifier(final @NotNull String group, final @NotNull String identifier) {
+        System.out.println("(Gestalt ) " + group + ":" + identifier);
         return getSortedByPriority().stream()   
             .filter(clazz -> clazz.getAnnotation(Feature.class).group().equalsIgnoreCase(group) && 
                 clazz.getAnnotation(Feature.class).identifier().equalsIgnoreCase(identifier))
