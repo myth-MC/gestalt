@@ -26,7 +26,7 @@ public final class FeatureListenerProcessor {
         return getListeners(ckazz) != null;
     }
 
-    public static void call(final @NotNull Object instance, final @NotNull FeatureEvent event) {
+    public static void call(final @NotNull Gestalt gestalt, final @NotNull Object instance, final @NotNull FeatureEvent event) {
         for (Method method : instance.getClass().getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
                 FeatureListener listener = method.getAnnotation(FeatureListener.class);
@@ -34,7 +34,7 @@ public final class FeatureListenerProcessor {
                 if (listener.group().isEmpty() || listener.identifier().isEmpty()) {
                     isPresent = !Arrays.stream(listener.events()).filter(e -> e.equals(event)).toList().isEmpty();
                 } else {
-                    isPresent = !Gestalt.get().getByGroupAndIdentifier(listener.group(), listener.identifier()).isEmpty();
+                    isPresent = !gestalt.getByGroupAndIdentifier(listener.group(), listener.identifier()).isEmpty();
                 }
             
                 if (isPresent) {

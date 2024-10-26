@@ -84,7 +84,7 @@ public class Gestalt {
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
             classMap.put(clazz, false);
 
-            getListenerRegistry().call(clazz, FeatureEvent.INITIALIZE);
+            getListenerRegistry().call(gestalt, clazz, FeatureEvent.INITIALIZE);
         });
     }
 
@@ -104,7 +104,7 @@ public class Gestalt {
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
             classMap.remove(clazz);
             getParamsRegistry().unregister(clazz.getName());
-            getListenerRegistry().call(clazz, FeatureEvent.SHUTDOWN);
+            getListenerRegistry().call(gestalt, clazz, FeatureEvent.SHUTDOWN);
         });
     }
 
@@ -122,7 +122,7 @@ public class Gestalt {
         if (FeatureConditionProcessor.canBeEnabled(clazz)) {
             classMap.put(clazz, true);
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureEnable.class);
-            getListenerRegistry().call(clazz, FeatureEvent.ENABLE);
+            getListenerRegistry().call(gestalt, clazz, FeatureEvent.ENABLE);
         }
     }
 
@@ -130,7 +130,7 @@ public class Gestalt {
         if (classMap.get(clazz)) {
             classMap.put(clazz, false);
             MethodUtil.triggerAnnotatedMethod(clazz, FeatureDisable.class);
-            getListenerRegistry().call(clazz, FeatureEvent.DISABLE);
+            getListenerRegistry().call(gestalt, clazz, FeatureEvent.DISABLE);
         }
     }
 

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 
+import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.annotations.FeatureListenerProcessor;
 
 public final class FeatureListenerRegistry {
@@ -71,8 +72,8 @@ public final class FeatureListenerRegistry {
     }
 
     // clase que llama al evento, evento
-    public void call(final @NotNull Class<?> clazz, final @NotNull FeatureEvent event) {
-        getInstances(clazz).forEach(instance -> FeatureListenerProcessor.call(instance, event));
+    public void call(final @NotNull Gestalt gestalt, final @NotNull Class<?> clazz, final @NotNull FeatureEvent event) {
+        getInstances(clazz).forEach(instance -> FeatureListenerProcessor.call(gestalt, instance, event));
     }
     
 }
