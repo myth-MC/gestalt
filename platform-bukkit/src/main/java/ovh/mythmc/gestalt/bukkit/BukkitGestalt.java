@@ -1,6 +1,7 @@
 package ovh.mythmc.gestalt.bukkit;
 
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -18,15 +19,15 @@ public class BukkitGestalt extends AbstractGestalt {
     }
 
     public void initialize() {
-        if (Bukkit.getServicesManager().isProvidedFor(IGestalt.class))
-            return;
-
-        Bukkit.getServicesManager().register(IGestalt.class, this, initializer, ServicePriority.Highest);    
-        initializer.getLogger().info("Registered Gestalt service provider");
+        RegisteredServiceProvider<IGestalt> rsp = initializer.getServer().getServicesManager().getRegistration(IGestalt.class);
+        if (rsp == null) {
+            Bukkit.getServicesManager().register(IGestalt.class, this, initializer, ServicePriority.Highest);    
+            initializer.getLogger().info("Registered Gestalt service provider (" + IGestalt.class + ")");
+        }
     }
 
     public static IGestalt get() {
-        return Bukkit.getServicesManager().load(IGestalt.class);
+        return Bukkit.getServer().getServicesManager().getRegistration(IGestalt.class).getProvider();
     }
 
     public static Builder builder() {
