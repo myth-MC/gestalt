@@ -8,15 +8,21 @@ import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.annotations.FeatureListenerProcessor;
+import ovh.mythmc.gestalt.IGestalt;
 
 public final class FeatureListenerRegistry {
+
+    private final IGestalt gestalt;
 
     // Instance that is listening for events, Class name of event that instance listens to
     private final Map<Object, String[]> listenerRegistry = new HashMap<>();
 
+    public FeatureListenerRegistry(@NotNull IGestalt gestalt) {
+        this.gestalt = gestalt;
+    }
+
     public void register(final @NotNull Object instance) {
-        String[] classes = FeatureListenerProcessor.getListeners(instance.getClass()).stream()
+        String[] classes = gestalt.getListenerProcessor().getListeners(instance.getClass()).stream()
             .map(clazz -> clazz.getName())
             .toArray(String[]::new);
 
@@ -70,7 +76,7 @@ public final class FeatureListenerRegistry {
     }
 
     public void call(final @NotNull Class<?> clazz, final @NotNull FeatureEvent event) {
-        getInstances(clazz).forEach(instance -> FeatureListenerProcessor.call(instance, event));
+        getInstances(clazz).forEach(instance -> gestalt.getListenerProcessor().call(instance, event));
     }
     
 }

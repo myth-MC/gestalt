@@ -1,10 +1,33 @@
 package ovh.mythmc.gestalt.bukkit;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.GestaltImpl;
+import ovh.mythmc.gestalt.IGestalt;
+import ovh.mythmc.gestalt.AbstractGestalt;
 
-public class BukkitGestalt {
+public class BukkitGestalt extends AbstractGestalt {
+
+    private final JavaPlugin initializer;
+
+    private BukkitGestalt(@NotNull JavaPlugin initializer) {
+        super(initializer.getServer().getVersion());
+        this.initializer = initializer;
+    }
+
+    public void initialize() {
+        if (Bukkit.getServicesManager().isProvidedFor(IGestalt.class))
+            return;
+
+        Bukkit.getServicesManager().register(IGestalt.class, this, initializer, ServicePriority.Highest);    
+        initializer.getLogger().info("Registered Gestalt service provider");
+    }
+
+    public static IGestalt get() {
+        return Bukkit.getServicesManager().load(IGestalt.class);
+    }
 
     public static Builder builder() {
         return new Builder();
@@ -12,43 +35,17 @@ public class BukkitGestalt {
 
     public static class Builder {
 
-        private JavaPlugin plugin;
+        private JavaPlugin initializer;
 
-        public Builder plugin(JavaPlugin plugin) {
-            this.plugin = plugin;
+        public Builder initializer(@NotNull JavaPlugin initializer) {
+            this.initializer = initializer;
             return this;
         }
  
-        public GestaltImpl build() {
-            return new GestaltImpl(plugin.getDescription().getVersion());
+        public BukkitGestalt build() {
+            return new BukkitGestalt(initializer);
         }
 
     }
 
-    /* 
-    public void initialize() {
-        PluginDescriptionFile descriptionFile = JavaPlugin.getPlugin(BukkitGestaltPlugin.class).getDescription();
-        File library = new File(plugin.getDataFolder().getParent(), "libs" + File.separator + "gestalt-" + descriptionFile.getVersion() + ".jar");
-        if (!library.exists()) {
-            String url = String.format("http://github.com/myth-MC/gestalt/releases/download/%s/gestalt-platform-bukkit-%s.jar", descriptionFile.getVersion(), descriptionFile.getVersion());
-            download(url, library.toPath());
-        }
-
-        try {
-            Bukkit.getPluginManager().loadPlugin(library);
-        } catch (UnknownDependencyException | InvalidPluginException | InvalidDescriptionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void download(final @NotNull String url, final @NotNull Path path) {
-        InputStream in = null;
-        try {
-            in = new URL(url).openStream();
-            Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
 }

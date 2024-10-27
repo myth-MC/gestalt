@@ -5,12 +5,18 @@ import java.lang.reflect.Method;
 
 import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.Gestalt;
+import ovh.mythmc.gestalt.IGestalt;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
 public final class FeatureConditionProcessor {
 
-    public static boolean canBeEnabled(@NotNull Class<?> clazz) {
+    private final IGestalt gestalt;
+
+    public FeatureConditionProcessor(@NotNull IGestalt gestalt) {
+        this.gestalt = gestalt;
+    }
+
+    public boolean canBeEnabled(@NotNull Class<?> clazz) {
         try {
             return booleanCondition(clazz) && versionCondition(clazz);
         } catch (Exception e) {
@@ -20,18 +26,18 @@ public final class FeatureConditionProcessor {
         return false;
     }
 
-    private static boolean booleanCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
+    private boolean booleanCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
         boolean b = true;
         
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(FeatureConditionBoolean.class))
-                b = (boolean) MethodUtil.invoke(clazz, method);
+                b = (boolean) MethodUtil.invoke(gestalt, clazz, method);
         }
 
         return b;
     }
 
-    private static boolean versionCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
+    private boolean versionCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
         String[] versions = null;
 
         if (clazz.isAnnotationPresent(FeatureConditionVersion.class))
@@ -41,7 +47,7 @@ public final class FeatureConditionProcessor {
             return true;
 
         for (String version : versions) {
-            if (version.equalsIgnoreCase("ALL") || Gestalt.get().getServerVersion().startsWith(version))
+            if (version.equalsIgnoreCase("ALL") || gestalt.getServerVersion().startsWith(version))
                 return true;
         }
 

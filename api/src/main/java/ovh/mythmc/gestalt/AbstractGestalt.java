@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import ovh.mythmc.gestalt.annotations.Feature;
-import ovh.mythmc.gestalt.annotations.conditions.FeatureConditionProcessor;
 import ovh.mythmc.gestalt.annotations.status.FeatureDisable;
 import ovh.mythmc.gestalt.annotations.status.FeatureEnable;
 import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
@@ -20,11 +19,11 @@ import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.features.GestaltFeature;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
-public class GestaltImpl implements Gestalt {
+public abstract class AbstractGestalt implements IGestalt {
 
     private final String serverVersion;
 
-    public GestaltImpl(String serverVersion) {
+    protected AbstractGestalt(String serverVersion) {
         this.serverVersion = serverVersion;
     }
 
@@ -42,7 +41,7 @@ public class GestaltImpl implements Gestalt {
             if (!clazz.isAnnotationPresent(Feature.class))
                 return;
 
-            MethodUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
+            MethodUtil.triggerAnnotatedMethod(this, clazz, FeatureInitialize.class);
             classMap.put(clazz, false);
 
             getListenerRegistry().call(clazz, FeatureEvent.INITIALIZE);
@@ -51,7 +50,7 @@ public class GestaltImpl implements Gestalt {
 
     public void register(final @NotNull GestaltFeature feature) {
         if (feature.getConstructorParams() != null) {
-            getParamsRegistry().register(feature.getFeatureClass(), feature.getConstructorParams());
+            getConstructorParamsRegistry().register(feature.getFeatureClass(), feature.getConstructorParams());
         }
 
         register(feature.getFeatureClass());
@@ -62,9 +61,9 @@ public class GestaltImpl implements Gestalt {
             if (!classMap.containsKey(clazz))
                 return;
 
-            MethodUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
+            MethodUtil.triggerAnnotatedMethod(this, clazz, FeatureShutdown.class);
             classMap.remove(clazz);
-            getParamsRegistry().unregister(clazz.getName());
+            getConstructorParamsRegistry().unregister(clazz.getName());
             getListenerRegistry().call(clazz, FeatureEvent.SHUTDOWN);
         });
     }
@@ -80,9 +79,9 @@ public class GestaltImpl implements Gestalt {
         if (classMap.get(clazz))
             return;
 
-        if (FeatureConditionProcessor.canBeEnabled(clazz)) {
+        if (getConditionProcessor().canBeEnabled(clazz)) {
             classMap.put(clazz, true);
-            MethodUtil.triggerAnnotatedMethod(clazz, FeatureEnable.class);
+            MethodUtil.triggerAnnotatedMethod(this, clazz, FeatureEnable.class);
             getListenerRegistry().call(clazz, FeatureEvent.ENABLE);
         }
     }
@@ -90,7 +89,7 @@ public class GestaltImpl implements Gestalt {
     public void disableFeature(final @NotNull Class<?> clazz) {
         if (classMap.get(clazz)) {
             classMap.put(clazz, false);
-            MethodUtil.triggerAnnotatedMethod(clazz, FeatureDisable.class);
+            MethodUtil.triggerAnnotatedMethod(this, clazz, FeatureDisable.class);
             getListenerRegistry().call(clazz, FeatureEvent.DISABLE);
         }
     }

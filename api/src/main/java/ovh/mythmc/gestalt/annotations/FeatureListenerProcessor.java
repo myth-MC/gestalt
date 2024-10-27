@@ -7,12 +7,18 @@ import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.Gestalt;
+import ovh.mythmc.gestalt.IGestalt;
 import ovh.mythmc.gestalt.features.FeatureEvent;
 
 public final class FeatureListenerProcessor {
 
-    public static ArrayList<Class<?>> getListeners(final @NotNull Class<?> clazz) {
+    private final IGestalt gestalt;
+
+    public FeatureListenerProcessor(@NotNull IGestalt gestalt) {
+        this.gestalt = gestalt;
+    }
+
+    public ArrayList<Class<?>> getListeners(final @NotNull Class<?> clazz) {
         ArrayList<Class<?>> listeners = new ArrayList<>();
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
@@ -22,7 +28,7 @@ public final class FeatureListenerProcessor {
                     break;
                 }
 
-                Gestalt.get().getByGroupAndIdentifier(listener.group(), listener.identifier()).forEach(listeners::add);
+                gestalt.getByGroupAndIdentifier(listener.group(), listener.identifier()).forEach(listeners::add);
             }
                 
         }
@@ -30,11 +36,11 @@ public final class FeatureListenerProcessor {
         return listeners;
     }
 
-    public static boolean hasListeners(final @NotNull Class<?> ckazz) {
+    public boolean hasListeners(final @NotNull Class<?> ckazz) {
         return getListeners(ckazz) != null;
     }
 
-    public static void call(final @NotNull Object instance, final @NotNull FeatureEvent event) {
+    public void call(final @NotNull Object instance, final @NotNull FeatureEvent event) {
         for (Method method : instance.getClass().getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
                 FeatureListener listener = method.getAnnotation(FeatureListener.class);

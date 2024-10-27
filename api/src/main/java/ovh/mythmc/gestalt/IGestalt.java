@@ -2,6 +2,8 @@ package ovh.mythmc.gestalt;
 
 import org.jetbrains.annotations.NotNull;
 
+import ovh.mythmc.gestalt.annotations.FeatureListenerProcessor;
+import ovh.mythmc.gestalt.annotations.conditions.FeatureConditionProcessor;
 import ovh.mythmc.gestalt.features.FeatureConstructorParamsRegistry;
 import ovh.mythmc.gestalt.features.FeatureListenerRegistry;
 import ovh.mythmc.gestalt.features.FeaturePriority;
@@ -9,13 +11,17 @@ import ovh.mythmc.gestalt.features.GestaltFeature;
 
 import java.util.List;
 
-public interface Gestalt {
+public interface IGestalt {
 
-    @NotNull static Gestalt get() { return GestaltSupplier.get(); }
+    //@NotNull static Gestalt get() { return GestaltSupplier.get(); }
 
-    @NotNull default FeatureConstructorParamsRegistry getParamsRegistry() { return new FeatureConstructorParamsRegistry(); }
+    @NotNull default FeatureConditionProcessor getConditionProcessor() { return new FeatureConditionProcessor(this); }
 
-    @NotNull default FeatureListenerRegistry getListenerRegistry() { return new FeatureListenerRegistry(); }
+    @NotNull default FeatureListenerProcessor getListenerProcessor() { return new FeatureListenerProcessor(this); }
+
+    @NotNull default FeatureConstructorParamsRegistry getConstructorParamsRegistry() { return new FeatureConstructorParamsRegistry(); }
+
+    @NotNull default FeatureListenerRegistry getListenerRegistry() { return new FeatureListenerRegistry(this); }
 
     String getServerVersion();
 
