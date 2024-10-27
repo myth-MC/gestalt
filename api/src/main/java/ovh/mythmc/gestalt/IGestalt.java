@@ -13,15 +13,15 @@ import java.util.List;
 
 public interface IGestalt {
 
-    //@NotNull static Gestalt get() { return GestaltSupplier.get(); }
+    FeatureConditionProcessor getConditionProcessor();
 
-    @NotNull default FeatureConditionProcessor getConditionProcessor() { return new FeatureConditionProcessor(this); }
+    FeatureListenerProcessor getListenerProcessor();
 
-    @NotNull default FeatureListenerProcessor getListenerProcessor() { return new FeatureListenerProcessor(this); }
+    FeatureConstructorParamsRegistry getConstructorParamsRegistry();
 
-    @NotNull default FeatureConstructorParamsRegistry getConstructorParamsRegistry() { return new FeatureConstructorParamsRegistry(); }
+    FeatureListenerRegistry getListenerRegistry();
 
-    @NotNull default FeatureListenerRegistry getListenerRegistry() { return new FeatureListenerRegistry(this); }
+    // @NotNull default FeatureListenerRegistry getListenerRegistry() { return new FeatureListenerRegistry(this); }
 
     String getServerVersion();
 
