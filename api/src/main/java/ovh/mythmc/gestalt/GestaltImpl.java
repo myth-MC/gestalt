@@ -15,39 +15,21 @@ import ovh.mythmc.gestalt.annotations.status.FeatureDisable;
 import ovh.mythmc.gestalt.annotations.status.FeatureEnable;
 import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
 import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
-import ovh.mythmc.gestalt.features.FeatureConstructorParamsRegistry;
 import ovh.mythmc.gestalt.features.FeatureEvent;
-import ovh.mythmc.gestalt.features.FeatureListenerRegistry;
 import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.features.GestaltFeature;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
-public class Gestalt {
-
-    private final FeatureConstructorParamsRegistry paramsRegistry = new FeatureConstructorParamsRegistry();
-
-    private final FeatureListenerRegistry listenerRegistry = new FeatureListenerRegistry();
+public class GestaltImpl implements Gestalt {
 
     private final String serverVersion;
 
-    public Gestalt(String serverVersion) {
+    public GestaltImpl(String serverVersion) {
         this.serverVersion = serverVersion;
-    }
-
-    public FeatureConstructorParamsRegistry getParamsRegistry() {
-        return paramsRegistry;
-    }
-
-    public FeatureListenerRegistry getListenerRegistry() {
-        return listenerRegistry;
     }
 
     public String getServerVersion() {
         return serverVersion;
-    }
-
-    public static Gestalt get() {
-        return GestaltSupplier.get();
     }
 
     private final Map<Class<?>, Boolean> classMap = new HashMap<>();

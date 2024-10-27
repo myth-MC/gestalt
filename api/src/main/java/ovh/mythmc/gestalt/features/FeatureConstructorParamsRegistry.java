@@ -3,9 +3,8 @@ package ovh.mythmc.gestalt.features;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class FeatureConstructorParamsRegistry {
 
