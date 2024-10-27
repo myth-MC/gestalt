@@ -14,20 +14,13 @@ public class BukkitGestaltBuilder {
 
         private JavaPlugin plugin;
 
-        private boolean overrideInstance = false;
-
         public Builder plugin(JavaPlugin plugin) {
             this.plugin = plugin;
             return this;
         }
-        
-        public Builder overrideInstance(boolean overrideInstance) {
-            this.overrideInstance = overrideInstance;
-            return this;
-        }
-
+ 
         public Gestalt build() {
-            return new Gestalt(plugin.getServer().getVersion(), overrideInstance);
+            return new Gestalt(plugin.getServer().getVersion());
         }
 
     }

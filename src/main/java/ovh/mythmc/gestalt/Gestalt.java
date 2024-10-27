@@ -15,8 +15,6 @@ import ovh.mythmc.gestalt.annotations.status.FeatureDisable;
 import ovh.mythmc.gestalt.annotations.status.FeatureEnable;
 import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
 import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
-import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
-import ovh.mythmc.gestalt.exceptions.NotInitializedException;
 import ovh.mythmc.gestalt.features.FeatureConstructorParamsRegistry;
 import ovh.mythmc.gestalt.features.FeatureEvent;
 import ovh.mythmc.gestalt.features.FeatureListenerRegistry;
@@ -32,13 +30,8 @@ public class Gestalt {
 
     private final String serverVersion;
 
-    private final boolean overrideInstance;
-
-    private static Gestalt gestalt;
-
-    public Gestalt(String serverVersion, boolean overrideInstance) {
+    public Gestalt(String serverVersion) {
         this.serverVersion = serverVersion;
-        this.overrideInstance = overrideInstance;
     }
 
     public FeatureConstructorParamsRegistry getParamsRegistry() {
@@ -53,22 +46,8 @@ public class Gestalt {
         return serverVersion;
     }
 
-    public static boolean isGestaltInitialized() {
-        return gestalt != null;
-    }
-
-    public static void set(final @NotNull Gestalt g) {
-        if (isGestaltInitialized() && !g.overrideInstance)
-            throw new AlreadyInitializedException("Gestalt is already initialized! (is Gestalt properly shaded?)");
-
-        gestalt = g;
-    }
-
     public static Gestalt get() {
-        if (gestalt == null)
-            throw new NotInitializedException();
-
-        return gestalt;
+        return GestaltSupplier.get();
     }
 
     private final Map<Class<?>, Boolean> classMap = new HashMap<>();
