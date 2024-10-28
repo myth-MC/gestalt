@@ -1,0 +1,6 @@
+name: gestalt
+description: A simple library to interact between plugins' features
+authors: [ myth-MC, U8092 ]
+version: '${project.version}'
+api-version: 1.13
+main: ovh.mythmc.gestalt.bukkit.BukkitGestaltPlugin
