@@ -29,8 +29,10 @@ public class BukkitGestalt {
     }
 
     public void initialize() {
-        if (Bukkit.getPluginManager().isPluginEnabled("gestalt"))
+        if (Bukkit.getPluginManager().isPluginEnabled("gestalt")) {
+            plugin = Bukkit.getPluginManager().getPlugin("gestalt");
             return;
+        }
 
         setupGestaltPath();
         if (!Files.exists(Path.of(getGestaltPath())))
