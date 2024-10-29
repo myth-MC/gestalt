@@ -3,29 +3,28 @@ package ovh.mythmc.gestalt.bukkit;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.InvalidDescriptionException;
-import org.bukkit.plugin.InvalidPluginException;
-import org.bukkit.plugin.UnknownDependencyException;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import ovh.mythmc.gestalt.IGestalt;
-import ovh.mythmc.gestalt.AbstractGestalt;
 
-public class BukkitGestalt extends AbstractGestalt {
+public class BukkitGestalt {
 
     private final String gestaltUrl = "https://assets.mythmc.ovh/gestalt/latest.jar";
 
     private final JavaPlugin initializer;
 
+    private static Plugin plugin;
+
     private BukkitGestalt(@NotNull JavaPlugin initializer) {
-        super(initializer.getServer().getVersion());
         this.initializer = initializer;
     }
 
@@ -39,10 +38,17 @@ public class BukkitGestalt extends AbstractGestalt {
 
         File file = new File(getGestaltPath());
         try {
-            BukkitGestaltPlugin plugin = (BukkitGestaltPlugin) Bukkit.getPluginManager().loadPlugin(file);
+            plugin = Bukkit.getPluginManager().loadPlugin(file);
+
+            ClassLoader classLoader = plugin.getClass().getClassLoader();
+            Class<?> bukkitGestaltPlugin = Class.forName("ovh.mythmc.gestalt.bukkit.BukkitGestaltPlugin", false, classLoader);
+            Class<?> interfaceGestalt = Class.forName("ovh.mythmc.gestalt.IGestalt", true, classLoader);
+            Method set = bukkitGestaltPlugin.getMethod("set", interfaceGestalt);
+            Class<?> bukkitGestaltInstance = Class.forName("ovh.mythmc.gestalt.bukkit.BukkitGestaltInstance", true, classLoader);
+            set.invoke(plugin, bukkitGestaltInstance.getConstructor().newInstance());
+
             Bukkit.getPluginManager().enablePlugin(plugin);
-            plugin.set(this);
-        } catch (UnknownDependencyException | InvalidPluginException | InvalidDescriptionException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -76,8 +82,17 @@ public class BukkitGestalt extends AbstractGestalt {
 }
 
     public static IGestalt get() {
-        BukkitGestaltPlugin gestalt = ((BukkitGestaltPlugin) Bukkit.getPluginManager().getPlugin("gestalt"));
-        return gestalt.get();
+        ClassLoader classLoader = plugin.getClass().getClassLoader();
+        Object instance = null;
+        try {
+            Class<?> bukkitGestaltPlugin = Class.forName("ovh.mythmc.gestalt.bukkit.BukkitGestaltPlugin", false, classLoader);
+            Method get = bukkitGestaltPlugin.getMethod("get");
+            instance = get.invoke(plugin);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return (IGestalt) instance;
     }
 
     public static Builder builder() {
