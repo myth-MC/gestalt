@@ -80,8 +80,8 @@ public class BukkitGestalt {
     private static long download(String url, String fileName) throws IOException {
         try (InputStream in = URI.create(url).toURL().openStream()) {
             return Files.copy(in, Paths.get(fileName));
+        }
     }
-}
 
     public static IGestalt get() {
         ClassLoader classLoader = plugin.getClass().getClassLoader();
@@ -89,7 +89,9 @@ public class BukkitGestalt {
         try {
             Class<?> bukkitGestaltPlugin = Class.forName("ovh.mythmc.gestalt.bukkit.BukkitGestaltPlugin", false, classLoader);
             Method get = bukkitGestaltPlugin.getMethod("get");
-            instance = get.invoke(plugin);
+            Class<?> interfaceGestalt = Class.forName("ovh.mythmc.gestalt.IGestalt", true, classLoader);
+            //instance = get.invoke(plugin);
+            instance = interfaceGestalt.cast(get.invoke(plugin));
         } catch (Exception e) {
             e.printStackTrace();
         }
