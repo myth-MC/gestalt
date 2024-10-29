@@ -6,7 +6,7 @@ import ovh.mythmc.gestalt.AbstractGestalt;
 
 public class BukkitGestaltInstance extends AbstractGestalt {
 
-    protected BukkitGestaltInstance() {
+    public BukkitGestaltInstance() {
         super(Bukkit.getServer().getVersion());
     }
     
