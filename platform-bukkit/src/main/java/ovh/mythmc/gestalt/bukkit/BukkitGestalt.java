@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +33,8 @@ public class BukkitGestalt extends AbstractGestalt {
         if (Bukkit.getPluginManager().isPluginEnabled("gestalt"))
             return;
 
-        //if (!Files.exists(Path.of(getGestaltPath())))
+        setupGestaltPath();
+        if (!Files.exists(Path.of(getGestaltPath())))
             downloadGestalt();
 
         File file = new File(getGestaltPath());
@@ -47,8 +47,16 @@ public class BukkitGestalt extends AbstractGestalt {
         }
     }
 
-    public String getGestaltPath() {
-        return initializer.getDataFolder() + "libs" + File.separator + "gestalt.jar";
+    private void setupGestaltPath() {
+        try {
+            Files.createDirectories(Path.of(getGestaltPath()).getParent());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getGestaltPath() {
+        return initializer.getDataFolder() + File.separator + "libs" + File.separator + "gestalt.jar";
     }
 
     private void downloadGestalt() {
