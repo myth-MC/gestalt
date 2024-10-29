@@ -22,6 +22,7 @@ public final class FeatureListenerRegistry {
     }
 
     public void register(final @NotNull Object instance) {
+        System.out.println("Registering listeners for " + instance);
         String[] classes = gestalt.getListenerProcessor().getListeners(instance.getClass()).stream()
             .map(clazz -> clazz.getName())
             .toArray(String[]::new);
