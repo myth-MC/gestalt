@@ -8,16 +8,16 @@ import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.IGestalt;
+import ovh.mythmc.gestalt.Gestalt;
 
 public final class FeatureListenerRegistry {
 
-    private final IGestalt gestalt;
+    private final Gestalt gestalt;
 
     // Instance that is listening for events, Class name of event that instance listens to
     private final Map<Object, String[]> listenerRegistry = new HashMap<>();
 
-    public FeatureListenerRegistry(@NotNull IGestalt gestalt) {
+    public FeatureListenerRegistry(@NotNull Gestalt gestalt) {
         this.gestalt = gestalt;
     }
 

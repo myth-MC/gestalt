@@ -7,14 +7,14 @@ import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.IGestalt;
+import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.features.FeatureEvent;
 
 public final class FeatureListenerProcessor {
 
-    private final IGestalt gestalt;
+    private final Gestalt gestalt;
 
-    public FeatureListenerProcessor(@NotNull IGestalt gestalt) {
+    public FeatureListenerProcessor(@NotNull Gestalt gestalt) {
         this.gestalt = gestalt;
     }
 

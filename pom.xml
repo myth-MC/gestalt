@@ -11,6 +11,7 @@
     <modules>
         <module>api</module>
         <module>platform-bukkit</module>
+        <module>loader</module>
     </modules>
 
     <build>

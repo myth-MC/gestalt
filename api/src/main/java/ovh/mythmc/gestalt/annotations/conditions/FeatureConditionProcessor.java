@@ -5,14 +5,14 @@ import java.lang.reflect.Method;
 
 import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.IGestalt;
+import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
 public final class FeatureConditionProcessor {
 
-    private final IGestalt gestalt;
+    private final Gestalt gestalt;
 
-    public FeatureConditionProcessor(@NotNull IGestalt gestalt) {
+    public FeatureConditionProcessor(@NotNull Gestalt gestalt) {
         this.gestalt = gestalt;
     }
 

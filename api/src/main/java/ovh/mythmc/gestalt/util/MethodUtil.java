@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import ovh.mythmc.gestalt.IGestalt;
+import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.features.FeatureConstructorParams;
 
 public final class MethodUtil {
@@ -19,14 +19,14 @@ public final class MethodUtil {
         throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
-    public static void triggerAnnotatedMethod(@NotNull IGestalt gestalt, Class<?> clazz, Class<? extends Annotation> annotation) {
+    public static void triggerAnnotatedMethod(@NotNull Gestalt gestalt, Class<?> clazz, Class<? extends Annotation> annotation) {
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation))
                 invoke(gestalt, clazz, method);
         }
     }
 
-    public static Object invoke(@NotNull IGestalt gestalt, @NotNull Class<?> clazz, @NotNull Method method) {
+    public static Object invoke(@NotNull Gestalt gestalt, @NotNull Class<?> clazz, @NotNull Method method) {
         try {
             return method.invoke(getInstance(gestalt, clazz));
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -36,7 +36,7 @@ public final class MethodUtil {
         return null;
     }
 
-    private static Object getInstance(@NotNull IGestalt gestalt, @NotNull Class<?> clazz) {
+    private static Object getInstance(@NotNull Gestalt gestalt, @NotNull Class<?> clazz) {
         if (instances.containsKey(clazz.getName()))
             return instances.get(clazz.getName());
         
