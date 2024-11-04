@@ -80,7 +80,7 @@ public class BukkitGestaltLoader {
         }
     }
 
-    public static Builder builder = new Builder();
+    public static Builder builder() { return new Builder(); }
 
     public static class Builder {
 
