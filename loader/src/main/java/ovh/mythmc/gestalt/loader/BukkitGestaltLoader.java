@@ -80,6 +80,8 @@ public class BukkitGestaltLoader {
         }
     }
 
+    public static Builder builder = new Builder();
+
     public static class Builder {
 
         private JavaPlugin initializer;
