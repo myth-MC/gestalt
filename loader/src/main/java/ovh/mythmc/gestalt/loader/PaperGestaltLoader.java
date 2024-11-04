@@ -28,6 +28,7 @@ public class PaperGestaltLoader extends GestaltLoader {
     public void load() {
         File file = new File(getGestaltPath());
         try {
+            
             Bukkit.getPluginManager().loadPlugin(file);
         } catch (Exception e) {
             e.printStackTrace();
