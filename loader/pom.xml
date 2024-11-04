@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>ovh.mythmc</groupId>
-    <artifactId>loader</artifactId>
+    <artifactId>gestalt-loader</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
