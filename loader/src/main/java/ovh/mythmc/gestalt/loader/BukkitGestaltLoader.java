@@ -14,12 +14,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class BukkitGestaltLoader {
 
-    private final JavaPlugin initializer;
+    private final Path dataDirectory;
+
+    private final GestaltLoggerWrapper logger;
+
+    private final boolean verbose;
 
     private final String gestaltUrl = "https://assets.mythmc.ovh/gestalt/latest.jar";
 
-    private BukkitGestaltLoader(JavaPlugin initializer) {
-        this.initializer = initializer;
+    protected BukkitGestaltLoader(Path dataDirectory, GestaltLoggerWrapper logger, boolean verbose) {
+        this.dataDirectory = dataDirectory;
+        this.logger = logger;
+        this.verbose = verbose;
     }
 
     public void initialize() {
@@ -34,18 +40,6 @@ public class BukkitGestaltLoader {
         File file = new File(getGestaltPath());
         try {
             Plugin plugin = Bukkit.getPluginManager().loadPlugin(file);
-
-            
-
-            /*
-            ClassLoader classLoader = plugin.getClass().getClassLoader();
-            Class<?> bukkitGestaltPlugin = Class.forName("ovh.mythmc.gestalt.bukkit.BukkitGestaltPlugin", false, classLoader);
-            Class<?> interfaceGestalt = Class.forName("ovh.mythmc.gestalt.IGestalt", true, classLoader);
-            Method set = bukkitGestaltPlugin.getMethod("set", interfaceGestalt);
-            Class<?> bukkitGestaltInstance = Class.forName("ovh.mythmc.gestalt.bukkit.BukkitGestaltInstance", true, classLoader);
-            set.invoke(plugin, bukkitGestaltInstance.getConstructor().newInstance());
-            */
-
             Bukkit.getPluginManager().enablePlugin(plugin);
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,7 +47,7 @@ public class BukkitGestaltLoader {
     }
 
     private String getGestaltPath() {
-        return initializer.getDataFolder() + File.separator + "libs" + File.separator + "gestalt.jar";
+        return dataDirectory + File.separator + "libs" + File.separator + "gestalt.jar";
     }
 
     private void setupGestaltPath() {
@@ -65,11 +59,12 @@ public class BukkitGestaltLoader {
     }
 
     private void downloadGestalt() {
-        initializer.getLogger().info("Downloading Gestalt...");
+        info("Downloading Gestalt...");
         try {
             long bytes = download(gestaltUrl, getGestaltPath());
-            initializer.getLogger().info("Downloaded " + (bytes / 1000000) + " MBs!");
+            info("Downloaded " + (bytes / 1000000) + " MBs");
         } catch (IOException e) {
+            error("Couldn't fetch gestalt! (switch DNS?)");
             e.printStackTrace();
         }
     }
@@ -80,21 +75,49 @@ public class BukkitGestaltLoader {
         }
     }
 
+    private void info(String message) {
+        if (verbose)
+            logger.info(message);
+    }
+
+    private void error(String message) {
+        logger.error(message);
+    }
+
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
 
-        private JavaPlugin initializer;
+        private Path dataDirectory;
+
+        private GestaltLoggerWrapper logger = new GestaltLoggerWrapper() { };
+
+        private boolean verbose = false;
 
         public Builder initializer(JavaPlugin initializer) {
-            this.initializer = initializer;
+            this.dataDirectory = Path.of(initializer.getDataFolder().getParent());
+            this.logger = GestaltLoggerWrapper.fromLogger(initializer.getLogger());
+            return this;
+        }
+
+        public Builder dataDirectory(Path dataDirectory) {
+            this.dataDirectory = dataDirectory;
+            return this;
+        }
+
+        public Builder logger(GestaltLoggerWrapper logger) {
+            this.logger = logger;
+            return this;
+        }
+
+        public Builder verbose(boolean verbose) {
+            this.verbose = verbose;
             return this;
         }
 
         public BukkitGestaltLoader build() {
-            return new BukkitGestaltLoader(initializer);
+            return new BukkitGestaltLoader(dataDirectory, logger, verbose);
         }
-        
     }
     
 }
