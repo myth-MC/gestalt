@@ -7,7 +7,7 @@ public class PaperGestaltBootstrap implements PluginBootstrap {
 
     @Override
     public void bootstrap(BootstrapContext context) {
-        BukkitGestaltLoader gestalt = BukkitGestaltLoader.builder()
+        PaperGestaltLoader gestalt = PaperGestaltLoader.builder()
             .dataDirectory(context.getDataDirectory())
             .logger(GestaltLoggerWrapper.fromComponentLogger(context.getLogger()))
             .build();
