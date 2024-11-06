@@ -22,7 +22,7 @@ public class BukkitGestaltLoader extends GestaltLoader {
     private final GestaltLoggerWrapper logger;
 
     @Override
-    public void load() {
+    protected void load() {
         File file = new File(getGestaltPath());
         Plugin plugin = null;
         try {
@@ -36,7 +36,7 @@ public class BukkitGestaltLoader extends GestaltLoader {
     }
 
     @Override
-    public boolean isAvailable() {
+    protected boolean isAvailable() {
         return Bukkit.getPluginManager().isPluginEnabled("gestalt");
     }
 

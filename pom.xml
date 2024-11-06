@@ -6,7 +6,7 @@
 
     <groupId>ovh.mythmc</groupId>
     <artifactId>gestalt</artifactId>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
     <packaging>pom</packaging>
     <modules>
         <module>api</module>
@@ -19,7 +19,7 @@
     </build>
 
     <name>gestalt</name>
-    <description>A small Minecraft library to manage your plug-in's features.</description>
+    <description>A simple Minecraft library that integrates plugins through a simple event-based feature system.</description>
     <url>https://github.com/myth-MC/gestalt</url>
     <licenses>
         <license>
