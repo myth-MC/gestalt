@@ -19,7 +19,6 @@ public final class FeatureListenerProcessor {
     }
 
     public ArrayList<Class<?>> getListeners(final @NotNull Class<?> clazz) {
-        System.out.println("Getting listeners for class " + clazz);
         ArrayList<Class<?>> listeners = new ArrayList<>();
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
@@ -38,8 +37,8 @@ public final class FeatureListenerProcessor {
         return listeners;
     }
 
-    public boolean hasListeners(final @NotNull Class<?> ckazz) {
-        return getListeners(ckazz) != null;
+    public boolean hasListeners(final @NotNull Class<?> clazz) {
+        return getListeners(clazz) != null;
     }
 
     public void call(final @NotNull Object instance, final @NotNull FeatureEvent event) {
