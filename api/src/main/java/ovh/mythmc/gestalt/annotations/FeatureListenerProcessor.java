@@ -7,16 +7,14 @@ import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.RequiredArgsConstructor;
 import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.features.FeatureEvent;
 
+@RequiredArgsConstructor
 public final class FeatureListenerProcessor {
 
     private final Gestalt gestalt;
-
-    public FeatureListenerProcessor(@NotNull Gestalt gestalt) {
-        this.gestalt = gestalt;
-    }
 
     public ArrayList<Class<?>> getListeners(final @NotNull Class<?> clazz) {
         ArrayList<Class<?>> listeners = new ArrayList<>();
@@ -33,7 +31,6 @@ public final class FeatureListenerProcessor {
                 
         }
 
-        System.out.println("Listeners for class " + clazz + ":" + listeners);
         return listeners;
     }
 
@@ -42,7 +39,6 @@ public final class FeatureListenerProcessor {
     }
 
     public void call(final @NotNull Object instance, final @NotNull FeatureEvent event) {
-        System.out.println("Calling " + event + " on " + instance);
         for (Method method : instance.getClass().getMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
                 FeatureListener listener = method.getAnnotation(FeatureListener.class);

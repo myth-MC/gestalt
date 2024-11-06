@@ -5,6 +5,8 @@ import java.util.logging.Logger;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public abstract class GestaltLoggerWrapper {
+
+    public boolean isVerbose() { return false; }
     
     public void info(String message) { }
 
@@ -12,8 +14,18 @@ public abstract class GestaltLoggerWrapper {
 
     public void error(String message) { }
 
-    public static GestaltLoggerWrapper fromLogger(Logger logger) {
+    public void verbose(String message) {
+        if (isVerbose())
+            info(message);
+    }
+
+    public static GestaltLoggerWrapper fromLogger(Logger logger, boolean verbose) {
         return new GestaltLoggerWrapper() {
+
+            @Override
+            public boolean isVerbose() {
+                return verbose;
+            }
 
             @Override
             public void info(String message) {
@@ -33,8 +45,13 @@ public abstract class GestaltLoggerWrapper {
         };
     }
 
-    public static GestaltLoggerWrapper fromComponentLogger(ComponentLogger componentLogger) {
+    public static GestaltLoggerWrapper fromComponentLogger(ComponentLogger componentLogger, boolean verbose) {
         return new GestaltLoggerWrapper() {
+
+            @Override
+            public boolean isVerbose() {
+                return verbose;
+            }
 
             @Override
             public void info(String message) {

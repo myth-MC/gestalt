@@ -10,33 +10,32 @@ import java.nio.file.Paths;
 
 public abstract class GestaltLoader {
 
-    protected final String gestaltUrl = "https://assets.mythmc.ovh/gestalt/latest.jar";
+    private final String gestaltUrl = "https://assets.mythmc.ovh/gestalt/latest.jar";
 
-    public abstract Path getDataDirectory();
+    protected abstract Path getDataDirectory();
 
-    public abstract GestaltLoggerWrapper getLogger();
+    protected abstract GestaltLoggerWrapper getLogger();
 
-    public abstract boolean isVerbose();
+    public abstract boolean isAvailable();
 
     public void initialize() {
-        if (!Files.exists(Path.of(getGestaltPath()))) {
-            setupGestaltPath();
-            downloadGestalt();
+        if (!isAvailable()) {
+            if (!Files.exists(Path.of(getGestaltPath()))) {
+                setupGestaltPath();
+                downloadGestalt();
+            }
+    
+            load();
         }
-
-        load();
-        enable();
     }
 
-    public void load() { }
-
-    public void enable() { }
+    public abstract void load();
 
     protected String getGestaltPath() {
         return getDataDirectory() + File.separator + "libs" + File.separator + "gestalt.jar";
     }
 
-    protected void setupGestaltPath() {
+    private void setupGestaltPath() {
         try {
             Files.createDirectories(Path.of(getGestaltPath()).getParent());
         } catch (IOException e) {
@@ -44,13 +43,13 @@ public abstract class GestaltLoader {
         }
     }
 
-    protected void downloadGestalt() {
-        getLogger().info("Downloading Gestalt...");
+    private void downloadGestalt() {
+        getLogger().verbose("Downloading Gestalt...");
         try {
             long bytes = download(gestaltUrl, getGestaltPath());
-            getLogger().info("Downloaded " + (bytes / 1000000) + " MBs");
+            getLogger().verbose("Downloaded " + bytes + " MBs");
         } catch (IOException e) {
-            getLogger().error("Couldn't fetch gestalt! (switch DNS servers?)");
+            getLogger().error("Couldn't fetch gestalt! (server down / switch DNS servers?)");
             e.printStackTrace();
         }
     }

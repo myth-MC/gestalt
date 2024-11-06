@@ -5,10 +5,16 @@ import java.nio.file.Path;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import ovh.mythmc.gestalt.loader.util.PaperPluginClassLoaderUtil;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+@Builder
 public class PaperGestaltLoader extends GestaltLoader {
    
     private final Plugin initializer;
@@ -17,93 +23,36 @@ public class PaperGestaltLoader extends GestaltLoader {
 
     private final GestaltLoggerWrapper logger;
 
-    private final boolean verbose;
-
-    private Plugin plugin;
-
-    private boolean isEnabled = false;
-
-    protected PaperGestaltLoader(Plugin initializer, Path dataDirectory, GestaltLoggerWrapper logger, boolean verbose) {
-        this.initializer = initializer;
-        this.dataDirectory = dataDirectory;
-        this.logger = logger;
-        this.verbose = verbose;
-    }
-
     @Override
     public void load() {
-        if (!isEnabled) {
-            File file = new File(getGestaltPath());
-            try {
-                plugin = Bukkit.getPluginManager().loadPlugin(file);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        File file = new File(getGestaltPath());
+        Plugin plugin = null;
+        try {
+            plugin = Bukkit.getPluginManager().loadPlugin(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        if (plugin != null) {
             Bukkit.getPluginManager().enablePlugin(plugin);
+            PaperPluginClassLoaderUtil.mergeClassLoaders(initializer, plugin);
         }
     }
 
     @Override
-    public void enable() {
-        if (!isEnabled)
-            PaperPluginClassLoaderUtil.mergeClassLoaders(initializer, plugin);
-
-        isEnabled = true;
+    public boolean isAvailable() {
+        return PaperPluginClassLoaderUtil.isAccessible(initializer, "ovh.mythmc.gestalt.Gestalt");
     }
 
-    public static Builder builder() { return new Builder(); }
+    public static class PaperGestaltLoaderBuilder {
 
-    public static class Builder {
-
-        private Plugin initializer;
-
-        private Path dataDirectory;
-
-        private GestaltLoggerWrapper logger = new GestaltLoggerWrapper() { };
-
-        private boolean verbose = false;
-
-        public Builder initializer(JavaPlugin initializer) {
+        public PaperGestaltLoaderBuilder initializer(Plugin initializer) {
             this.initializer = initializer;
             this.dataDirectory = Path.of(initializer.getDataFolder().getParent());
-            this.logger = GestaltLoggerWrapper.fromLogger(initializer.getLogger());
+            this.logger = GestaltLoggerWrapper.fromLogger(initializer.getLogger(), true);
             return this;
         }
 
-        public Builder dataDirectory(Path dataDirectory) {
-            this.dataDirectory = dataDirectory;
-            return this;
-        }
-
-        public Builder logger(GestaltLoggerWrapper logger) {
-            this.logger = logger;
-            return this;
-        }
-
-        public Builder verbose(boolean verbose) {
-            this.verbose = verbose;
-            return this;
-        }
-
-        public PaperGestaltLoader build() {
-            return new PaperGestaltLoader(initializer, dataDirectory, logger, verbose);
-        }
     }
 
-    @Override
-    public Path getDataDirectory() {
-        return dataDirectory;
-    }
-
-    @Override
-    public GestaltLoggerWrapper getLogger() {
-        return logger;
-    }
-
-    @Override
-    public boolean isVerbose() {
-        return verbose;
-    }
-    
 }

@@ -1,42 +1,39 @@
 package ovh.mythmc.gestalt.util;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.experimental.UtilityClass;
 import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.features.FeatureConstructorParams;
 
-public final class MethodUtil {
+@UtilityClass
+public class MethodUtil {
 
-    private static final Map<String, Object> instances = new HashMap<>();
+    private final Map<String, Object> instances = new HashMap<>();
 
-    private MethodUtil() {
-        throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
-    }
-
-    public static void triggerAnnotatedMethod(@NotNull Gestalt gestalt, Class<?> clazz, Class<? extends Annotation> annotation) {
+    public void triggerAnnotatedMethod(@NotNull Gestalt gestalt, Class<?> clazz, Class<? extends Annotation> annotation) {
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation))
                 invoke(gestalt, clazz, method);
         }
     }
 
-    public static Object invoke(@NotNull Gestalt gestalt, @NotNull Class<?> clazz, @NotNull Method method) {
+    public Object invoke(@NotNull Gestalt gestalt, @NotNull Class<?> clazz, @NotNull Method method) {
         try {
             return method.invoke(getInstance(gestalt, clazz));
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    private static Object getInstance(@NotNull Gestalt gestalt, @NotNull Class<?> clazz) {
+    private Object getInstance(@NotNull Gestalt gestalt, @NotNull Class<?> clazz) {
         if (instances.containsKey(clazz.getName()))
             return instances.get(clazz.getName());
         
@@ -51,8 +48,7 @@ public final class MethodUtil {
 
             instances.put(clazz.getName(), instance);
             return instance;
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

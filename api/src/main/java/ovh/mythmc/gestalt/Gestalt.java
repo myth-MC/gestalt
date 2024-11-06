@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import ovh.mythmc.gestalt.annotations.Feature;
 import ovh.mythmc.gestalt.annotations.FeatureListenerProcessor;
 import ovh.mythmc.gestalt.annotations.conditions.FeatureConditionProcessor;
@@ -23,6 +25,7 @@ import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.features.GestaltFeature;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
+@Getter
 public abstract class Gestalt {
 
     private final String serverVersion;
@@ -43,26 +46,7 @@ public abstract class Gestalt {
         this.serverVersion = serverVersion;
     }
 
-    public FeatureConditionProcessor getConditionProcessor() {
-        return conditionProcessor;
-    }
-
-    public FeatureListenerProcessor getListenerProcessor() {
-        return listenerProcessor;
-    }
-
-    public FeatureConstructorParamsRegistry getConstructorParamsRegistry() {
-        return constructorParamsRegistry;
-    }
-
-    public FeatureListenerRegistry getListenerRegistry() {
-        return listenerRegistry;
-    }
-
-    public String getServerVersion() {
-        return serverVersion;
-    }
-
+    @Getter(AccessLevel.NONE)
     private final Map<Class<?>, Boolean> classMap = new HashMap<>();
 
     public void register(final @NotNull Class<?>... classes) {

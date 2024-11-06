@@ -7,94 +7,46 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+@Builder
 public class BukkitGestaltLoader extends GestaltLoader {
 
     private final Path dataDirectory;
 
     private final GestaltLoggerWrapper logger;
 
-    private final boolean verbose;
-
-    private Plugin plugin;
-
-    protected BukkitGestaltLoader(Path dataDirectory, GestaltLoggerWrapper logger, boolean verbose) {
-        this.dataDirectory = dataDirectory;
-        this.logger = logger;
-        this.verbose = verbose;
-    }
-
-    @Override
-    public void initialize() {
-        if (Bukkit.getPluginManager().isPluginEnabled("gestalt"))
-            return;
-        
-        super.initialize();
-    }
-
     @Override
     public void load() {
         File file = new File(getGestaltPath());
+        Plugin plugin = null;
         try {
             plugin = Bukkit.getPluginManager().loadPlugin(file);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        if (plugin != null)
+            Bukkit.getPluginManager().enablePlugin(plugin);
     }
 
     @Override
-    public void enable() {
-        Bukkit.getPluginManager().enablePlugin(plugin);
+    public boolean isAvailable() {
+        return Bukkit.getPluginManager().isPluginEnabled("gestalt");
     }
 
-    public static Builder builder() { return new Builder(); }
+    public static class BukkitGestaltLoaderBuilder {
 
-    public static class Builder {
-
-        private Path dataDirectory;
-
-        private GestaltLoggerWrapper logger = new GestaltLoggerWrapper() { };
-
-        private boolean verbose = false;
-
-        public Builder initializer(JavaPlugin initializer) {
+        public BukkitGestaltLoaderBuilder initializer(JavaPlugin initializer) {
             this.dataDirectory = Path.of(initializer.getDataFolder().getParent());
-            this.logger = GestaltLoggerWrapper.fromLogger(initializer.getLogger());
+            this.logger = GestaltLoggerWrapper.fromLogger(initializer.getLogger(), true);
             return this;
         }
-
-        public Builder dataDirectory(Path dataDirectory) {
-            this.dataDirectory = dataDirectory;
-            return this;
-        }
-
-        public Builder logger(GestaltLoggerWrapper logger) {
-            this.logger = logger;
-            return this;
-        }
-
-        public Builder verbose(boolean verbose) {
-            this.verbose = verbose;
-            return this;
-        }
-
-        public BukkitGestaltLoader build() {
-            return new BukkitGestaltLoader(dataDirectory, logger, verbose);
-        }
-    }
-
-    @Override
-    public Path getDataDirectory() {
-        return dataDirectory;
-    }
-
-    @Override
-    public GestaltLoggerWrapper getLogger() {
-        return logger;
-    }
-
-    @Override
-    public boolean isVerbose() {
-        return verbose;
     }
     
 }

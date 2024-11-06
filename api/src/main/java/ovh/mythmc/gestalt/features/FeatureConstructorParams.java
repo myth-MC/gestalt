@@ -1,44 +1,30 @@
 package ovh.mythmc.gestalt.features;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+@Builder
 public class FeatureConstructorParams {
 
     private final Object[] params;
 
     private final Class<?>[] paramTypes;
 
-    public FeatureConstructorParams(Object[] params, Class<?>[] paramTypes) {
-        this.params = params;
-        this.paramTypes = paramTypes;
-    }
+    public static class FeatureConstructorParamsBuilder {
 
-    public Object[] getParams() { return params; }
-
-    public Class<?>[] getParamTypes() { return paramTypes; }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private Object[] params = null;
-
-        private Class<?>[] paramTypes = null;
-
-        public Builder params(Object... params) {
+        public FeatureConstructorParamsBuilder params(Object... params) {
             this.params = params;
             return this;
         }
 
-        public Builder types(Class<?>... paramTypes) {
+        public FeatureConstructorParamsBuilder types(Class<?>... paramTypes) {
             this.paramTypes = paramTypes;
             return this;
         }
-
-        public FeatureConstructorParams build() {
-            return new FeatureConstructorParams(params, paramTypes);
-        }
-
+        
     }
     
 }
