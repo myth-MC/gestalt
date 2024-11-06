@@ -25,7 +25,7 @@ public final class PaperPluginClassLoaderUtil {
             // Get classloaders inside global plugin class loader group
             Field classloadersField = getField(globalGroup.getClass(), "classloaders");
             classloadersField.setAccessible(true);
-            List<?> classloaders = (List<?>) classloadersField.get(PaperClassLoaderStorage.instance());
+            List<?> classloaders = (List<?>) classloadersField.get(globalGroup);
 
             // Search for this plugin on global group's classloaders
             for (Object o : classloaders) {
