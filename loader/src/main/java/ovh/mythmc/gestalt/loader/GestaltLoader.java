@@ -63,7 +63,7 @@ public abstract class GestaltLoader {
         getLogger().verbose("Downloading gestalt...");
         try {
             long bytes = download(getProperties().getProperty("downloadUrl"), getGestaltPath());
-            getLogger().verbose("Downloaded " + bytes + " MBs");
+            getLogger().verbose("Downloaded " + (bytes / 1000) + " KBs");
         } catch (IOException e) {
             getLogger().error("Couldn't fetch gestalt! (is server down? / switch DNS servers?)");
             e.printStackTrace();

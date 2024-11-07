@@ -1,6 +1,6 @@
 name: gestalt
 description: A simple library to integrate plugins through a simple event-based feature system
 authors: [ myth-MC, U8092 ]
-version: '${project.version}'
+version: '${project.parent.version}'
 api-version: 1.13
 main: ovh.mythmc.gestalt.bukkit.BukkitGestaltPlugin
