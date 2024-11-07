@@ -34,6 +34,7 @@
             <groupId>ovh.mythmc</groupId>
             <artifactId>gestalt-api</artifactId>
             <version>${project.parent.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>

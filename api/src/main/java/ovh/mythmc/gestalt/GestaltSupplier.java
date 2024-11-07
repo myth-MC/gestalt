@@ -3,7 +3,6 @@ package ovh.mythmc.gestalt;
 import org.jetbrains.annotations.NotNull;
 
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
-import ovh.mythmc.gestalt.exceptions.NotInitializedException;
 
 public final class GestaltSupplier {
 
@@ -17,9 +16,6 @@ public final class GestaltSupplier {
     }
 
     public static @NotNull Gestalt get() { 
-        if (gestalt == null)
-            throw new NotInitializedException();
-            
         return gestalt; 
     }
     

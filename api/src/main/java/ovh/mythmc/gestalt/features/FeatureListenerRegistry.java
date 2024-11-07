@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus.Experimental;
 
 import lombok.RequiredArgsConstructor;
 import ovh.mythmc.gestalt.Gestalt;
@@ -17,6 +18,14 @@ public final class FeatureListenerRegistry {
 
     public void register(final @NotNull Object instance) {
         listenerRegistry.add(instance);
+    }
+
+    @Experimental
+    public void register(final @NotNull Object instance, boolean callEventWhenRegistered) {
+        register(instance);
+        if (callEventWhenRegistered) {
+            gestalt.getEnabledClasses().forEach(clazz -> gestalt.getListenerProcessor().call(instance, FeatureEvent.ENABLE));
+        }
     }
 
     public void unregister(final @NotNull Object instance) {
