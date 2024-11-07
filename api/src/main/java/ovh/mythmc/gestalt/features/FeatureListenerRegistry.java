@@ -24,7 +24,7 @@ public final class FeatureListenerRegistry {
     public void register(final @NotNull Object instance, boolean callEventWhenRegistered) {
         register(instance);
         if (callEventWhenRegistered) {
-            gestalt.getEnabledClasses().forEach(clazz -> gestalt.getListenerProcessor().call(instance, FeatureEvent.ENABLE));
+            gestalt.getEnabledClasses().forEach(clazz -> gestalt.getListenerProcessor().call(instance, clazz, FeatureEvent.ENABLE));
         }
     }
 
@@ -70,7 +70,7 @@ public final class FeatureListenerRegistry {
     }
 
     public void call(final @NotNull Class<?> clazz, final @NotNull FeatureEvent event) {
-        getInstances(clazz).forEach(instance -> gestalt.getListenerProcessor().call(instance, event));
+        getInstances(clazz).forEach(instance -> gestalt.getListenerProcessor().call(instance, clazz, event));
     }
     
 }
