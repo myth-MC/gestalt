@@ -6,14 +6,20 @@
 
     <groupId>ovh.mythmc</groupId>
     <artifactId>gestalt</artifactId>
-    <version>0.1.5</version>
+    <version>0.1.7</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>api</module>
+        <module>platform-bukkit</module>
+        <module>loader</module>
+    </modules>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
     </build>
 
     <name>gestalt</name>
-    <description>A small Minecraft library to manage your plug-in's features.</description>
+    <description>A simple Minecraft library that integrates plugins through a simple event-based feature system.</description>
     <url>https://github.com/myth-MC/gestalt</url>
     <licenses>
         <license>
@@ -124,25 +130,19 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>26.0.1</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
-           <groupId>org.spigotmc</groupId>
-           <artifactId>spigot-api</artifactId>
-           <version>1.21.1-R0.1-SNAPSHOT</version>
-           <scope>provided</scope>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.34</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
