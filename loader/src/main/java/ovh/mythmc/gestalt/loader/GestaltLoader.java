@@ -44,7 +44,8 @@ public abstract class GestaltLoader {
         try {
             // Get class loader and close with reflection
             URLClassLoader loader = (URLClassLoader) Gestalt.get().getClass().getClassLoader();
-            ((JarFile) loader.getClass().getField("jar").get(loader)).close();
+            loader.close();
+            //((JarFile) loader.getClass().getField("jar").get(loader)).close();
 
             // Delete file
             Files.deleteIfExists(Path.of(getGestaltPath()));
