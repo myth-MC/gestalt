@@ -88,7 +88,7 @@ public abstract class GestaltLoader {
 
             if (url != null) {
                 try {
-                    long bytes = download(getProperties().getProperty("downloadUrl"), getGestaltPath());
+                    long bytes = download(url, getGestaltPath());
                     getLogger().verbose("Downloaded " + (bytes / 1000) + " KBs from server " + i);
                     downloaded = true;
                     break;
