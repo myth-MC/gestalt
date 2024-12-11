@@ -4,10 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.jar.JarFile;
+
+import ovh.mythmc.gestalt.Gestalt;
 
 public abstract class GestaltLoader {
 
@@ -18,22 +22,35 @@ public abstract class GestaltLoader {
     protected abstract boolean isAvailable();
 
     public void initialize() {
-        if (!isAvailable()) {
-            setupGestaltPath();
-            if (!Files.exists(Path.of(getGestaltPath())))
-                downloadGestalt();
+        if (isAvailable())
+            return;
 
+        setupGestaltPath();
+
+        boolean load = true;
+        if (!Files.exists(Path.of(getGestaltPath())))
+            load = downloadGestalt();
+
+        if (load)
             load();
-        }
     }
 
     protected abstract void load();
 
     public void terminate() {
+        if (!Gestalt.get().isAutoUpdate())
+            return;
+
         try {
+            // Get class loader and close with reflection
+            URLClassLoader loader = (URLClassLoader) Gestalt.get().getClass().getClassLoader();
+            ((JarFile) loader.getClass().getField("jar").get(loader)).close();
+
+            // Delete file
             Files.deleteIfExists(Path.of(getGestaltPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            getLogger().error("Error while terminating the instance!");
+            t.printStackTrace(System.err);
         }
     }
 
@@ -44,9 +61,10 @@ public abstract class GestaltLoader {
     private Properties getProperties() {
         Properties properties = new Properties();
         try {
-            properties.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
+            properties.load(getClass().getClassLoader().getResourceAsStream("gestalt.properties"));
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().error("Gestalt properties file not accessible! (shaded?)");
+            e.printStackTrace(System.err);
         }
         return properties;
     }
@@ -55,19 +73,33 @@ public abstract class GestaltLoader {
         try {
             Files.createDirectories(Path.of(getGestaltPath()).getParent());
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().error("Gestalt path cannot be created! (permission issue?)");
+            e.printStackTrace(System.err);
         }
     }
 
-    private void downloadGestalt() {
-        getLogger().verbose("Downloading gestalt...");
-        try {
-            long bytes = download(getProperties().getProperty("downloadUrl"), getGestaltPath());
-            getLogger().verbose("Downloaded " + (bytes / 1000) + " KBs");
-        } catch (IOException e) {
-            getLogger().error("Couldn't fetch gestalt! (is server down? / switch DNS servers?)");
-            e.printStackTrace();
+    private boolean downloadGestalt() {
+        boolean downloaded = false;
+
+        getLogger().verbose("Downloading gestalt (event-based library for managing features)...");
+        for (int i = 1; i <= 10; i++) { // Up to 10 download links
+            String key = "server." + i;
+            String url = getProperties().getProperty(key);
+
+            if (url != null) {
+                try {
+                    long bytes = download(getProperties().getProperty("downloadUrl"), getGestaltPath());
+                    getLogger().verbose("Downloaded " + (bytes / 1000) + " KBs from server " + i);
+                    downloaded = true;
+                    break;
+                } catch (IOException e) {
+                    getLogger().error("Couldn't fetch gestalt! (server down? / switch DNS servers?)");
+                    getLogger().info("Retrying with server " + (i+1) + "...");
+                }
+            }
         }
+
+        return downloaded;
     }
 
     private static long download(String url, String fileName) throws IOException {

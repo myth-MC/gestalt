@@ -43,7 +43,7 @@ public class PaperGestaltLoader extends GestaltLoader {
     protected boolean isAvailable() {
         return PaperPluginClassLoaderUtil.isAccessible(initializer, "ovh.mythmc.gestalt.Gestalt");
     }
-
+    
     public static class PaperGestaltLoaderBuilder {
 
         public PaperGestaltLoaderBuilder initializer(Plugin initializer) {

@@ -30,6 +30,8 @@ public abstract class Gestalt {
 
     private final String serverVersion;
 
+    private final boolean autoUpdate; // Used by GestaltLoader
+
     private final FeatureConditionProcessor conditionProcessor = new FeatureConditionProcessor(this);
 
     private final FeatureListenerProcessor listenerProcessor = new FeatureListenerProcessor(this);
@@ -42,8 +44,9 @@ public abstract class Gestalt {
         return GestaltSupplier.get();
     }
 
-    protected Gestalt(String serverVersion) {
+    protected Gestalt(String serverVersion, boolean autoUpdate) {
         this.serverVersion = serverVersion;
+        this.autoUpdate = autoUpdate;
     }
 
     @Getter(AccessLevel.NONE)
