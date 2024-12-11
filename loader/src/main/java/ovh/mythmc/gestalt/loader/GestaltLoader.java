@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.jar.JarFile;
 
 import ovh.mythmc.gestalt.Gestalt;
 
@@ -45,7 +44,6 @@ public abstract class GestaltLoader {
             // Get class loader and close with reflection
             URLClassLoader loader = (URLClassLoader) Gestalt.get().getClass().getClassLoader();
             loader.close();
-            //((JarFile) loader.getClass().getField("jar").get(loader)).close();
 
             // Delete file
             Files.deleteIfExists(Path.of(getGestaltPath()));
