@@ -18,8 +18,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
-import org.jetbrains.annotations.ApiStatus.NonExtendable;
-
 import com.google.auto.service.AutoService;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.FieldSpec;
@@ -169,7 +167,6 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         var callbackListener = TypeSpec.interfaceBuilder(simpleName + LISTENER_SUFFIX)
             .addModifiers(Modifier.PUBLIC)
             .addAnnotation(FunctionalInterface.class)
-            .addAnnotation(NonExtendable.class)
             .addMethod(MethodSpec.methodBuilder("trigger")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(parameters)
@@ -192,7 +189,6 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         var callbackHandler = TypeSpec.interfaceBuilder(simpleName + HANDLER_SUFFIX)
             .addModifiers(Modifier.PUBLIC)
             .addAnnotation(FunctionalInterface.class)
-            .addAnnotation(NonExtendable.class)
             .addMethod(MethodSpec.methodBuilder("handle")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameter(originalClass, "ctx")
