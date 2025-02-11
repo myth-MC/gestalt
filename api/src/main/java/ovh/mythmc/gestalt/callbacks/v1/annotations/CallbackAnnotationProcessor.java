@@ -42,9 +42,6 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
 
     private final static String LISTENER_SUFFIX = "CallbackListener";
 
-    public CallbackAnnotationProcessor() {
-    }
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(CallbackFieldGetter.class)) {
@@ -267,15 +264,26 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addStatement("callbackHandlers.add(callbackHandler)")
             .build();
         
-        var handle = MethodSpec.methodBuilder("handle")
+        var consumerOfObject = ParameterizedTypeName.get(ClassName.get("java.util.function", "Consumer"), objectClass);
+        var handleWithResult = MethodSpec.methodBuilder("handle")
             .addModifiers(Modifier.PUBLIC)
             .addParameter(objectClass, "object")
+            .addParameter(consumerOfObject, "result")
             .beginControlFlow("for ($T handler : callbackHandlers)", callbackHandler)
             .addStatement("object = handler.handle(object)")
             .endControlFlow()
             .beginControlFlow("for ($T listener : callbackListeners)", callbackListener)
             .addStatement("listener.trigger(" + getParameterGettersAsObjectFields(typeElement) + ")") // !!
             .endControlFlow()
+            .beginControlFlow("if (result != null)")
+            .addStatement("result.accept(object)")
+            .endControlFlow()
+            .build();
+
+        var handle = MethodSpec.methodBuilder("handle")
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(objectClass, "object")
+            .addStatement("handle(object, null)")
             .build();
 
         // Class
@@ -287,6 +295,7 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addMethod(constructor)
             .addMethod(registerHandler)
             .addMethod(registerListener)
+            .addMethod(handleWithResult)
             .addMethod(handle)
             .build();
 
