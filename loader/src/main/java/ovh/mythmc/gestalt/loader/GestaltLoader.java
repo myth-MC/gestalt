@@ -11,6 +11,8 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import ovh.mythmc.gestalt.Gestalt;
+import ovh.mythmc.gestalt.loader.callbacks.GestaltInitialize;
+import ovh.mythmc.gestalt.loader.callbacks.GestaltInitializeCallback;
 
 public abstract class GestaltLoader {
 
@@ -32,6 +34,8 @@ public abstract class GestaltLoader {
 
         if (load)
             load();
+
+        GestaltInitializeCallback.INSTANCE.handle(new GestaltInitialize(this));
     }
 
     protected abstract void load();

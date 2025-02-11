@@ -20,6 +20,7 @@ import javax.tools.Diagnostic;
 
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
+import com.google.auto.service.AutoService;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
@@ -32,6 +33,7 @@ import com.palantir.javapoet.TypeSpec;
     "ovh.mythmc.gestalt.callbacks.v1.annotations.Callback",
     "ovh.mythmc.gestalt.callbacks.v1.annotations.CallbackFieldGetter"
 })
+@AutoService(javax.annotation.processing.Processor.class)
 public final class CallbackAnnotationProcessor extends AbstractProcessor {
 
     private final static String CALLBACK_SUFFIX = "Callback";
