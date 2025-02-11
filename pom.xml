@@ -6,7 +6,7 @@
 
     <groupId>ovh.mythmc</groupId>
     <artifactId>gestalt</artifactId>
-    <version>0.1.10</version>
+    <version>0.2.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>api</module>
@@ -22,7 +22,34 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.bsc.maven</groupId>
+                    <artifactId>maven-processor-plugin</artifactId>
+                    <version>5.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <processors>
+                                <processor>ovh.mythmc.gestalt.callbacks.v1.annotations.CallbackAnnotationProcessor</processor>
+                            </processors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
