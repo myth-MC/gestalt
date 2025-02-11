@@ -42,6 +42,9 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
 
     private final static String LISTENER_SUFFIX = "CallbackListener";
 
+    public CallbackAnnotationProcessor() {
+    }
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(CallbackFieldGetter.class)) {
