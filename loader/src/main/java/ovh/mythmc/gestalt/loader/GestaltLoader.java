@@ -13,6 +13,8 @@ import java.util.Properties;
 import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.loader.callbacks.GestaltInitialize;
 import ovh.mythmc.gestalt.loader.callbacks.GestaltInitializeCallback;
+import ovh.mythmc.gestalt.loader.callbacks.GestaltShutdown;
+import ovh.mythmc.gestalt.loader.callbacks.GestaltShutdownCallback;
 
 public abstract class GestaltLoader {
 
@@ -41,6 +43,8 @@ public abstract class GestaltLoader {
     protected abstract void load();
 
     public void terminate() {
+        GestaltShutdownCallback.INSTANCE.handle(new GestaltShutdown(this));
+
         if (!Gestalt.get().isAutoUpdate())
             return;
 

@@ -4,6 +4,6 @@ import ovh.mythmc.gestalt.callbacks.v1.annotations.Callback;
 import ovh.mythmc.gestalt.loader.GestaltLoader;
 
 @Callback
-public final record GestaltInitialize(GestaltLoader loader) { 
+public final record GestaltShutdown(GestaltLoader loader) { 
 
 }
