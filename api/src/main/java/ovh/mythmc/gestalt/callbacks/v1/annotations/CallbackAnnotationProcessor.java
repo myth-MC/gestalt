@@ -333,18 +333,14 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addModifiers(Modifier.PUBLIC)
             .addParameter(ArrayTypeName.of(IdentifierKey.class), "identifiers")
             .varargs(true)
-            .addStatement("$T.out.println(identifiers.toString())", System.class)
             .addStatement("$T.stream(identifiers).forEach(callbackListeners::remove)", Arrays.class)
-            .addStatement("$T.out.println(callbackListeners.toString())", System.class)
             .build();
 
         var unregisterHandlers = MethodSpec.methodBuilder("unregisterHandlers")
             .addModifiers(Modifier.PUBLIC)
             .addParameter(ArrayTypeName.of(IdentifierKey.class), "identifiers")
             .varargs(true)
-            .addStatement("$T.out.println(identifiers.toString())", System.class)
             .addStatement("$T.stream(identifiers).forEach(callbackHandlers::remove)", Arrays.class)
-            .addStatement("$T.out.println(callbackHandlers.toString())", System.class)
             .build();
         
         var consumerOfObject = ParameterizedTypeName.get(ClassName.get("java.util.function", "Consumer"), objectParameter.type());
