@@ -45,7 +45,7 @@ public final class FeatureListenerProcessor {
     }
 
     public void call(final @NotNull Object instance, final @Nullable Class<?> eventClass, final @NotNull FeatureEvent event) {
-        for (Method method : instance.getClass().getMethods()) {
+        for (Method method : instance.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
                 FeatureListener listener = method.getAnnotation(FeatureListener.class);
                 if (!getMethodListeners(method).contains(eventClass))
@@ -56,7 +56,7 @@ public final class FeatureListenerProcessor {
                     try {
                         method.invoke(instance);
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        e.getCause().printStackTrace(System.err);
                     }
                 }
             }
