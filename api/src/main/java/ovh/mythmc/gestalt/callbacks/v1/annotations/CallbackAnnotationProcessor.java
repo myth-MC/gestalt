@@ -3,6 +3,7 @@ package ovh.mythmc.gestalt.callbacks.v1.annotations;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,8 +27,11 @@ import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.javapoet.TypeVariableName;
+
+import ovh.mythmc.gestalt.key.IdentifierKey;
 
 @SupportedAnnotationTypes({
     "ovh.mythmc.gestalt.callbacks.v1.annotations.Callback",
@@ -266,18 +270,18 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .initializer("new " + qualifiedName.toString() + CALLBACK_SUFFIX + "()")
             .build();
 
-        // Listener list
-        var collectionOfCallbackListeners = ParameterizedTypeName.get(ClassName.get("java.util", "Collection"), callbackListenerClass);
-        var listenerList = FieldSpec.builder(collectionOfCallbackListeners.box(), "callbackListeners")
+        // Listener map
+        var mapOfCallbackListeners = ParameterizedTypeName.get(ClassName.get("java.util", "Map"), TypeName.get(IdentifierKey.class), callbackListenerClass);
+        var listenerMap = FieldSpec.builder(mapOfCallbackListeners.box(), "callbackListeners")
             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-            .initializer("new java.util.ArrayList<>()")
+            .initializer("new $T<>()", HashMap.class)
             .build();
 
-        // Handler list
-        var collectionOfCallbackHandlers = ParameterizedTypeName.get(ClassName.get("java.util", "Collection"), callbackHandlerClass);
-        var handlerList = FieldSpec.builder(collectionOfCallbackHandlers.box(), "callbackHandlers")
+        // Handler map
+        var mapOfCallbackHandlers = ParameterizedTypeName.get(ClassName.get("java.util", "Map"), TypeName.get(IdentifierKey.class), callbackHandlerClass);
+        var handlerMap = FieldSpec.builder(mapOfCallbackHandlers.box(), "callbackHandlers")
             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-            .initializer("new java.util.ArrayList<>()")
+            .initializer("new $T<>()", HashMap.class)
             .build();
 
         // Constructor
@@ -285,20 +289,54 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addModifiers(Modifier.PRIVATE)
             .build();
 
+        var identifierKeyParameter = ParameterSpec.builder(IdentifierKey.class, "identifier").build();
+
         var registerListener = MethodSpec.methodBuilder("registerListener")
             .addModifiers(Modifier.PUBLIC)
             .addTypeVariables(typeVariables)
+            .addParameter(identifierKeyParameter)
             .addParameter(callbackListenerParameter)
             .addParameters(getTypeVariableNamesAsParameterSpecs(typeElement))
-            .addStatement("callbackListeners.add(callbackListener)")
+            .addStatement("callbackListeners.put($N, $N)", identifierKeyParameter, callbackListenerParameter)
+            .build();
+
+        var registerListenerWithStringKey = MethodSpec.methodBuilder("registerListener")
+            .addModifiers(Modifier.PUBLIC)
+            .addTypeVariables(typeVariables)
+            .addParameter(String.class, "key")
+            .addParameter(callbackListenerParameter)
+            .addParameters(getTypeVariableNamesAsParameterSpecs(typeElement))
+            .addStatement("registerListener(IdentifierKey.of(key), $N)", callbackListenerParameter)
             .build();
 
         var registerHandler = MethodSpec.methodBuilder("registerHandler")
             .addModifiers(Modifier.PUBLIC)
             .addTypeVariables(typeVariables)
+            .addParameter(identifierKeyParameter)
             .addParameter(callbackHandlerParameter)
             .addParameters(getTypeVariableNamesAsParameterSpecs(typeElement))
-            .addStatement("callbackHandlers.add(callbackHandler)")
+            .addStatement("callbackHandlers.put($N, $N)", identifierKeyParameter, callbackHandlerParameter)
+            .build();
+
+        var registerHandlerWithStringKey = MethodSpec.methodBuilder("registerHandler")
+            .addModifiers(Modifier.PUBLIC)
+            .addTypeVariables(typeVariables)
+            .addParameter(String.class, "key")
+            .addParameter(callbackHandlerParameter)
+            .addParameters(getTypeVariableNamesAsParameterSpecs(typeElement))
+            .addStatement("registerHandler(IdentifierKey.of(key), $N)", callbackHandlerParameter)
+            .build();
+
+        var unregisterListener = MethodSpec.methodBuilder("unregisterListener")
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(identifierKeyParameter)
+            .addStatement("callbackListeners.remove($N)", identifierKeyParameter)
+            .build();
+
+        var unregisterHandler = MethodSpec.methodBuilder("unregisterHandler")
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(identifierKeyParameter)
+            .addStatement("callbackHandlers.remove($N)", identifierKeyParameter)
             .build();
         
         var consumerOfObject = ParameterizedTypeName.get(ClassName.get("java.util.function", "Consumer"), objectParameter.type());
@@ -307,10 +345,10 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addTypeVariables(typeVariables)
             .addParameter(objectParameter)
             .addParameter(consumerOfObject, "result")
-            .beginControlFlow("for ($T handler : callbackHandlers)", callbackHandlerClass)
+            .beginControlFlow("for ($T handler : callbackHandlers.values())", callbackHandlerClass)
             .addStatement("handler.handle(object)")
             .endControlFlow()
-            .beginControlFlow("for ($T listener : callbackListeners)", callbackListenerClass)
+            .beginControlFlow("for ($T listener : callbackListeners.values())", callbackListenerClass)
             .addStatement("java.util.concurrent.CompletableFuture.runAsync(() -> listener.trigger(" + getParameterGettersAsObjectFields(typeElement) + "))")
             .endControlFlow()
             .beginControlFlow("if (result != null)")
@@ -329,11 +367,15 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         TypeSpec callbackClass = TypeSpec.classBuilder(simpleName + CALLBACK_SUFFIX)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addField(instance)
-            .addField(handlerList)
-            .addField(listenerList)
+            .addField(handlerMap)
+            .addField(listenerMap)
             .addMethod(constructor)
             .addMethod(registerHandler)
+            .addMethod(registerHandlerWithStringKey)
+            .addMethod(unregisterHandler)
             .addMethod(registerListener)
+            .addMethod(registerListenerWithStringKey)
+            .addMethod(unregisterListener)
             .addMethod(handleWithResult)
             .addMethod(handle)
             .build();
