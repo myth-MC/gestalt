@@ -9,6 +9,7 @@ public final class IdentifierKey {
     private IdentifierKey(String group, String identifier) {
         this.group = group;
         this.identifier = identifier;
+        System.out.println(group + ":" + identifier + " - " + hashCode());
     }
 
     public String group() { return group; }
@@ -32,10 +33,9 @@ public final class IdentifierKey {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + (this.group != null ? this.group.hashCode() : 0);
-        hash = 53 * hash + (this.identifier != null ? this.identifier.hashCode() : 0);
-        return hash;
+        //int hash = 3;
+        //hash = 53 * hash + this.group.hashCode() + this.identifier.hashCode();
+        return this.group.hashCode() + this.identifier.hashCode();
     }
 
     public static IdentifierKey of(String group, String identifier) {
