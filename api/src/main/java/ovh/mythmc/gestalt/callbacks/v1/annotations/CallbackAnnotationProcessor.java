@@ -2,6 +2,7 @@ package ovh.mythmc.gestalt.callbacks.v1.annotations;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,6 +22,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
 import com.google.auto.service.AutoService;
+import com.palantir.javapoet.ArrayTypeName;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
@@ -327,16 +329,18 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addStatement("registerHandler(IdentifierKey.of(key), $N)", callbackHandlerParameter)
             .build();
 
-        var unregisterListener = MethodSpec.methodBuilder("unregisterListener")
+        var unregisterListeners = MethodSpec.methodBuilder("unregisterListeners")
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(identifierKeyParameter)
-            .addStatement("callbackListeners.remove($N)", identifierKeyParameter)
+            .addParameter(ArrayTypeName.of(IdentifierKey.class), "identifiers")
+            .varargs(true)
+            .addStatement("$T.stream(identifiers).forEach(callbackListeners::remove)", Arrays.class)
             .build();
 
-        var unregisterHandler = MethodSpec.methodBuilder("unregisterHandler")
+        var unregisterHandlers = MethodSpec.methodBuilder("unregisterHandlers")
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(identifierKeyParameter)
-            .addStatement("callbackHandlers.remove($N)", identifierKeyParameter)
+            .addParameter(ArrayTypeName.of(IdentifierKey.class), "identifiers")
+            .varargs(true)
+            .addStatement("$T.stream(identifiers).forEach(callbackHandlers::remove)", Arrays.class)
             .build();
         
         var consumerOfObject = ParameterizedTypeName.get(ClassName.get("java.util.function", "Consumer"), objectParameter.type());
@@ -372,10 +376,10 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addMethod(constructor)
             .addMethod(registerHandler)
             .addMethod(registerHandlerWithStringKey)
-            .addMethod(unregisterHandler)
+            .addMethod(unregisterHandlers)
             .addMethod(registerListener)
             .addMethod(registerListenerWithStringKey)
-            .addMethod(unregisterListener)
+            .addMethod(unregisterListeners)
             .addMethod(handleWithResult)
             .addMethod(handle)
             .build();
