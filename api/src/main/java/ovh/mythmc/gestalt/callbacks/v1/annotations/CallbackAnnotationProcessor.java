@@ -275,14 +275,14 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         // Listener map
         var mapOfCallbackListeners = ParameterizedTypeName.get(ClassName.get("java.util", "HashMap"), TypeName.get(IdentifierKey.class), callbackListenerClass);
         var listenerMap = FieldSpec.builder(mapOfCallbackListeners.box(), "callbackListeners")
-            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .initializer("new $T<>()", HashMap.class)
             .build();
 
         // Handler map
         var mapOfCallbackHandlers = ParameterizedTypeName.get(ClassName.get("java.util", "HashMap"), TypeName.get(IdentifierKey.class), callbackHandlerClass);
         var handlerMap = FieldSpec.builder(mapOfCallbackHandlers.box(), "callbackHandlers")
-            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .initializer("new $T<>()", HashMap.class)
             .build();
 
