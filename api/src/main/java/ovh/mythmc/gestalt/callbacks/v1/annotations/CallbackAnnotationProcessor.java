@@ -158,7 +158,7 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         String objectFieldsString = "";
 
         for (int i = 0; i < parameterNames.size(); i++) {
-            objectFieldsString = objectFieldsString + "object." + getFieldGetter(typeElement, (String) parameterNames.toArray()[i]);
+            objectFieldsString = objectFieldsString + "callback." + getFieldGetter(typeElement, (String) parameterNames.toArray()[i]);
 
             if (i < parameterNames.size() - 1)
                 objectFieldsString = objectFieldsString + ", ";
@@ -191,9 +191,9 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         return getter;
     }
 
-    private void writeListenerInterface(Iterable<ParameterSpec> parameters, Collection<TypeVariableName> typeVariables, String packageName, String simpleName) {
+    private TypeSpec getListenerInterface(Iterable<ParameterSpec> parameters, Collection<TypeVariableName> typeVariables, String packageName, String simpleName) {
         var callbackListenerBuilder = TypeSpec.interfaceBuilder(simpleName + LISTENER_SUFFIX)
-            .addModifiers(Modifier.PUBLIC)
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addAnnotation(FunctionalInterface.class)
             .addMethod(MethodSpec.methodBuilder("trigger")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -204,19 +204,12 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             callbackListenerBuilder = callbackListenerBuilder
                 .addTypeVariables(typeVariables);
 
-        JavaFile callbackFile = JavaFile.builder(packageName.toString(), callbackListenerBuilder.build())
-            .build();
-
-        try {
-            callbackFile.writeTo(processingEnv.getFiler());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return callbackListenerBuilder.build();
     }
 
-    private void writeHandlerInterface(ParameterSpec objectParameter, Iterable<ParameterSpec> parameters, Collection<TypeVariableName> typeVariables, String qualifiedName, String packageName, String simpleName) {
+    private TypeSpec getHandlerInterface(ParameterSpec objectParameter, Iterable<ParameterSpec> parameters, Collection<TypeVariableName> typeVariables, String qualifiedName, String packageName, String simpleName) {
         var callbackHandlerBuilder = TypeSpec.interfaceBuilder(simpleName + HANDLER_SUFFIX)
-            .addModifiers(Modifier.PUBLIC)
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addAnnotation(FunctionalInterface.class)
             .addMethod(MethodSpec.methodBuilder("handle")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -227,14 +220,7 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             callbackHandlerBuilder = callbackHandlerBuilder
                 .addTypeVariables(typeVariables);
 
-        JavaFile callbackFile = JavaFile.builder(packageName.toString(), callbackHandlerBuilder.build())
-            .build();
-
-        try {
-            callbackFile.writeTo(processingEnv.getFiler());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return callbackHandlerBuilder.build();
     }
 
     private void writeCallbackFile(TypeElement typeElement) {
@@ -246,17 +232,19 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         final var typeVariables = getTypeVariableNames(typeElement);
 
         final var objectClass = ClassName.bestGuess(qualifiedName.toString());
-        var objectParameter = ParameterSpec.builder(objectClass, "object").build();
+        var objectParameter = ParameterSpec.builder(objectClass, "callback").build();
         if (!typeVariables.isEmpty())
-            objectParameter = ParameterSpec.builder(ParameterizedTypeName.get(objectClass, typeVariables.toArray(new TypeVariableName[typeVariables.size()])), "object").build();
+            objectParameter = ParameterSpec.builder(ParameterizedTypeName.get(objectClass, typeVariables.toArray(new TypeVariableName[typeVariables.size()])), "callback").build();
 
-        writeListenerInterface(parameters, typeVariables, packageName.toString(), simpleName.toString());
-        writeHandlerInterface(objectParameter, parameters, typeVariables, qualifiedName.toString(), packageName.toString(), simpleName.toString());
+        final var callbackListenerTypeSpec = getListenerInterface(parameters, typeVariables, packageName.toString(), simpleName.toString());
+        final var callbackHandlerTypeSpec = getHandlerInterface(objectParameter, parameters, typeVariables, qualifiedName.toString(), packageName.toString(), simpleName.toString());
 
-        final var callbackListenerClass = ClassName.bestGuess(qualifiedName.toString() + LISTENER_SUFFIX);
+        //final var callbackListenerClass = ClassName.bestGuess(qualifiedName.toString() + LISTENER_SUFFIX);
+        final var callbackListenerClass = ClassName.get(packageName.toString(), simpleName + CALLBACK_SUFFIX, simpleName + LISTENER_SUFFIX);
         var callbackListenerParameter = ParameterSpec.builder(callbackListenerClass, "callbackListener").build();
 
-        final var callbackHandlerClass = ClassName.bestGuess(qualifiedName.toString() + HANDLER_SUFFIX);
+        //final var callbackHandlerClass = ClassName.bestGuess(qualifiedName.toString() + HANDLER_SUFFIX);
+        final var callbackHandlerClass = ClassName.get(packageName.toString(), simpleName + CALLBACK_SUFFIX, simpleName + HANDLER_SUFFIX);
         var callbackHandlerParameter = ParameterSpec.builder(callbackHandlerClass, "callbackHandler").build();
 
         if (!typeVariables.isEmpty()) {
@@ -275,14 +263,14 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
         // Listener map
         var mapOfCallbackListeners = ParameterizedTypeName.get(ClassName.get("java.util", "HashMap"), TypeName.get(IdentifierKey.class), callbackListenerClass);
         var listenerMap = FieldSpec.builder(mapOfCallbackListeners.box(), "callbackListeners")
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
             .initializer("new $T<>()", HashMap.class)
             .build();
 
         // Handler map
         var mapOfCallbackHandlers = ParameterizedTypeName.get(ClassName.get("java.util", "HashMap"), TypeName.get(IdentifierKey.class), callbackHandlerClass);
         var handlerMap = FieldSpec.builder(mapOfCallbackHandlers.box(), "callbackHandlers")
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
             .initializer("new $T<>()", HashMap.class)
             .build();
 
@@ -350,13 +338,13 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addParameter(objectParameter)
             .addParameter(consumerOfObject, "result")
             .beginControlFlow("for ($T handler : callbackHandlers.values())", callbackHandlerClass)
-            .addStatement("handler.handle(object)")
+            .addStatement("handler.handle(callback)")
             .endControlFlow()
             .beginControlFlow("for ($T listener : callbackListeners.values())", callbackListenerClass)
             .addStatement("java.util.concurrent.CompletableFuture.runAsync(() -> listener.trigger(" + getParameterGettersAsObjectFields(typeElement) + "))")
             .endControlFlow()
             .beginControlFlow("if (result != null)")
-            .addStatement("result.accept(object)")
+            .addStatement("result.accept(callback)")
             .endControlFlow()
             .build();
 
@@ -364,7 +352,7 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addModifiers(Modifier.PUBLIC)
             .addTypeVariables(typeVariables)
             .addParameter(objectParameter)
-            .addStatement("handle(object, null)")
+            .addStatement("handle(callback, null)")
             .build();
 
         // Class
@@ -382,6 +370,8 @@ public final class CallbackAnnotationProcessor extends AbstractProcessor {
             .addMethod(unregisterListeners)
             .addMethod(handleWithResult)
             .addMethod(handle)
+            .addType(callbackHandlerTypeSpec)
+            .addType(callbackListenerTypeSpec)
             .build();
 
         JavaFile callbackFile = JavaFile.builder(packageName.toString(), callbackClass)
