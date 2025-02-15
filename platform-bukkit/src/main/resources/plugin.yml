@@ -3,4 +3,5 @@ description: A simple library to integrate plugins through a simple event-based 
 authors: [ myth-MC, U8092 ]
 version: '${project.parent.version}'
 api-version: 1.13
+folia-supported: true
 main: ovh.mythmc.gestalt.bukkit.BukkitGestaltPlugin
