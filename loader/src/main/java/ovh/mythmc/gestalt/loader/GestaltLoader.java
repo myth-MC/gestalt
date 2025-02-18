@@ -37,13 +37,13 @@ public abstract class GestaltLoader {
         if (load)
             load();
 
-        GestaltInitializeCallback.INSTANCE.handle(new GestaltInitialize(this));
+        GestaltInitializeCallback.INSTANCE.invoke(new GestaltInitialize(this));
     }
 
     protected abstract void load();
 
     public void terminate() {
-        GestaltShutdownCallback.INSTANCE.handle(new GestaltShutdown(this));
+        GestaltShutdownCallback.INSTANCE.invoke(new GestaltShutdown(this));
 
         if (!Gestalt.get().isAutoUpdate())
             return;
