@@ -24,15 +24,6 @@
         </repository>
     </repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>ovh.mythmc</groupId>
-            <artifactId>callbacks-lib</artifactId>
-            <version>0.1.1</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
