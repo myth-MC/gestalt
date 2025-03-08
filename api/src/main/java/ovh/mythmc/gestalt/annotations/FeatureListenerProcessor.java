@@ -47,11 +47,12 @@ public final class FeatureListenerProcessor {
     public void call(final @NotNull Object instance, final @Nullable Class<?> eventClass, final @NotNull FeatureEvent event) {
         for (Method method : instance.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(FeatureListener.class)) {
-                FeatureListener listener = method.getAnnotation(FeatureListener.class);
+                final FeatureListener listener = method.getAnnotation(FeatureListener.class);
                 if (!getMethodListeners(method).contains(eventClass))
                     continue;
 
-                boolean isPresent = !Arrays.stream(listener.events()).filter(e -> e.equals(event)).toList().isEmpty();
+                final boolean isPresent = Arrays.asList(listener.events()).contains(event);
+                //boolean isPresent = !Arrays.stream(listener.events()).filter(e -> e.equals(event)).toList().isEmpty();
                 if (isPresent) {
                     try {
                         method.invoke(instance);
