@@ -6,7 +6,7 @@
     <parent>
           <groupId>ovh.mythmc</groupId>
           <artifactId>gestalt</artifactId>
-          <version>0.2.0</version>
+          <version>0.2.1</version>
     </parent>
 
     <artifactId>gestalt-api</artifactId>
@@ -17,18 +17,18 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>mythmc-releases</id>
+            <url>https://repo.mythmc.ovh/repository/releases</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
-            <groupId>com.palantir.javapoet</groupId>
-            <artifactId>javapoet</artifactId>
-            <version>0.6.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service-annotations</artifactId>
-            <version>1.1.1</version>
+            <groupId>ovh.mythmc</groupId>
+            <artifactId>callbacks-lib</artifactId>
+            <version>0.1.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -37,35 +37,8 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <release>17</release>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>com.google.auto.service</groupId>
-                            <artifactId>auto-service</artifactId>
-                            <version>1.1.1</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>1.18.34</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.6.0</version>
-                <configuration>
-                    <minimizeJar>true</minimizeJar>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                    </transformers>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>

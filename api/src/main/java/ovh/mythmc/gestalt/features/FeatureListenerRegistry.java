@@ -1,7 +1,9 @@
 package ovh.mythmc.gestalt.features;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.ApiStatus.Experimental;
@@ -44,10 +46,13 @@ public final class FeatureListenerRegistry {
         return listenerRegistry.contains(instance);
     }
 
-    public List<Object> getInstances(final @NotNull String className) {
-        List<Object> instances = new ArrayList<>();
+    public Set<Object> getInstances(final @NotNull String className) {
+        Set<Object> instances = new HashSet<>();
 
         listenerRegistry.forEach(instance -> {
+            if (instances.contains(instance))
+                return;
+
             gestalt.getListenerProcessor().getListeners(instance.getClass()).forEach(clazz -> {
                 if (clazz.getName().equals(className))
                     instances.add(instance);
@@ -57,7 +62,7 @@ public final class FeatureListenerRegistry {
         return instances;
     }
 
-    public List<Object> getInstances(final @NotNull Class<?> clazz) {
+    public Set<Object> getInstances(final @NotNull Class<?> clazz) {
         return getInstances(clazz.getName());
     }
 
