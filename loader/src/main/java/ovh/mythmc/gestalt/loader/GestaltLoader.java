@@ -21,12 +21,12 @@ public abstract class GestaltLoader {
     protected abstract boolean isAvailable();
 
     public void initialize() {
-        if (isAvailable())
+        if (isAvailable()) // Gestalt is already initialized
             return;
 
-        setupGestaltPath();
+        setupGestaltPath(); // Create directory
 
-        boolean load = true;
+        boolean load = true; // Whether the plugin should load
         if (!Files.exists(Path.of(getGestaltPath())))
             load = downloadGestalt();
 
