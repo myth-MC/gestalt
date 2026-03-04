@@ -5,14 +5,16 @@ import java.lang.reflect.Method;
 
 import org.jetbrains.annotations.NotNull;
 
-import lombok.RequiredArgsConstructor;
 import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
-@RequiredArgsConstructor
 public final class FeatureConditionProcessor {
 
     private final Gestalt gestalt;
+
+    public FeatureConditionProcessor(@NotNull Gestalt gestalt) {
+        this.gestalt = gestalt;
+    }
 
     public boolean canBeEnabled(@NotNull Class<?> clazz) {
         try {

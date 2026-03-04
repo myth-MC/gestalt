@@ -8,15 +8,17 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.ApiStatus.Experimental;
 
-import lombok.RequiredArgsConstructor;
 import ovh.mythmc.gestalt.Gestalt;
 
-@RequiredArgsConstructor
 public final class FeatureListenerRegistry {
 
     private final Gestalt gestalt;
 
     private final List<Object> listenerRegistry = new ArrayList<>();
+
+    public FeatureListenerRegistry(@NotNull Gestalt gestalt) {
+        this.gestalt = gestalt;
+    }
 
     public void register(final @NotNull Object instance) {
         listenerRegistry.add(instance);

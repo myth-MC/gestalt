@@ -8,14 +8,16 @@ import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import lombok.RequiredArgsConstructor;
 import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.features.FeatureEvent;
 
-@RequiredArgsConstructor
 public final class FeatureListenerProcessor {
 
     private final Gestalt gestalt;
+
+    public FeatureListenerProcessor(@NotNull Gestalt gestalt) {
+        this.gestalt = gestalt;
+    }
 
     public ArrayList<Class<?>> getMethodListeners(final @NotNull Method method) {
         ArrayList<Class<?>> methodListeners = new ArrayList<>();

@@ -7,23 +7,24 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import lombok.experimental.UtilityClass;
 import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.features.FeatureConstructorParams;
 
-@UtilityClass
 public class MethodUtil {
 
-    private final Map<String, Object> instances = new HashMap<>();
+    private MethodUtil() {
+    }
 
-    public void triggerAnnotatedMethod(@NotNull Gestalt gestalt, Class<?> clazz, Class<? extends Annotation> annotation) {
+    private static final Map<String, Object> instances = new HashMap<>();
+
+    public static void triggerAnnotatedMethod(@NotNull Gestalt gestalt, Class<?> clazz, Class<? extends Annotation> annotation) {
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation))
                 invoke(gestalt, clazz, method);
         }
     }
 
-    public Object invoke(@NotNull Gestalt gestalt, @NotNull Class<?> clazz, @NotNull Method method) {
+    public static Object invoke(@NotNull Gestalt gestalt, @NotNull Class<?> clazz, @NotNull Method method) {
         try {
             return method.invoke(getInstance(gestalt, clazz));
         } catch (Exception e) {
@@ -33,7 +34,7 @@ public class MethodUtil {
         return null;
     }
 
-    private Object getInstance(@NotNull Gestalt gestalt, @NotNull Class<?> clazz) {
+    private static Object getInstance(@NotNull Gestalt gestalt, @NotNull Class<?> clazz) {
         if (instances.containsKey(clazz.getName()))
             return instances.get(clazz.getName());
         

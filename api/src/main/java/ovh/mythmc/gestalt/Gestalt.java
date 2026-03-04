@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import ovh.mythmc.gestalt.annotations.Feature;
 import ovh.mythmc.gestalt.annotations.FeatureListenerProcessor;
 import ovh.mythmc.gestalt.annotations.conditions.FeatureConditionProcessor;
@@ -25,20 +23,40 @@ import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.features.GestaltFeature;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
-@Getter
 public abstract class Gestalt {
 
     private final String serverVersion;
-
     private final boolean autoUpdate; // Used by GestaltLoader
-
     private final FeatureConditionProcessor conditionProcessor = new FeatureConditionProcessor(this);
-
     private final FeatureListenerProcessor listenerProcessor = new FeatureListenerProcessor(this);
-
     private final FeatureConstructorParamsRegistry constructorParamsRegistry = new FeatureConstructorParamsRegistry();
-
     private final FeatureListenerRegistry listenerRegistry = new FeatureListenerRegistry(this);
+
+    private final Map<Class<?>, Boolean> classMap = new HashMap<>();
+
+    public String getServerVersion() {
+        return this.serverVersion;
+    }
+
+    public boolean isAutoUpdate() {
+        return this.autoUpdate;
+    }
+
+    public FeatureConditionProcessor getConditionProcessor() {
+        return this.conditionProcessor;
+    }
+
+    public FeatureListenerProcessor getListenerProcessor() {
+        return this.listenerProcessor;
+    }
+
+    public FeatureConstructorParamsRegistry getConstructorParamsRegistry() {
+        return this.constructorParamsRegistry;
+    }
+
+    public FeatureListenerRegistry getListenerRegistry() {
+        return this.listenerRegistry;
+    }
 
     public static Gestalt get() {
         return GestaltSupplier.get();
@@ -48,9 +66,6 @@ public abstract class Gestalt {
         this.serverVersion = serverVersion;
         this.autoUpdate = autoUpdate;
     }
-
-    @Getter(AccessLevel.NONE)
-    private final Map<Class<?>, Boolean> classMap = new HashMap<>();
 
     public void register(final @NotNull Class<?>... classes) {
         Arrays.stream(classes).forEach(clazz -> {
