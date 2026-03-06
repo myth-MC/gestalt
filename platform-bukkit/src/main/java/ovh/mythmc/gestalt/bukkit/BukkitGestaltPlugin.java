@@ -8,7 +8,6 @@ public class BukkitGestaltPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
         GestaltSupplier.set(new BukkitGestalt(this));
     }
     
