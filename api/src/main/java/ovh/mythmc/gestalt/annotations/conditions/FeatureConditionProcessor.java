@@ -8,14 +8,37 @@ import org.jetbrains.annotations.NotNull;
 import ovh.mythmc.gestalt.Gestalt;
 import ovh.mythmc.gestalt.util.MethodUtil;
 
+/**
+ * Evaluates whether a {@link Feature}-annotated class satisfies all conditions
+ * required to be enabled.
+ *
+ * <p>Conditions are checked via:
+ * <ul>
+ *   <li>Methods annotated with {@link FeatureConditionBoolean}, which must return {@code true}</li>
+ *   <li>The {@link FeatureConditionVersion} annotation, which restricts features to specific server versions</li>
+ * </ul>
+ */
 public final class FeatureConditionProcessor {
 
     private final Gestalt gestalt;
 
+    /**
+     * Constructs a new {@code FeatureConditionProcessor} for the given {@link Gestalt} instance.
+     *
+     * @param gestalt the active Gestalt instance
+     */
     public FeatureConditionProcessor(@NotNull Gestalt gestalt) {
         this.gestalt = gestalt;
     }
 
+    /**
+     * Determines whether the given feature class satisfies all conditions required to be enabled.
+     *
+     * <p>Returns {@code false} if any condition check throws an exception, logging the stack trace.
+     *
+     * @param clazz the feature class to evaluate
+     * @return {@code true} if all conditions are met, {@code false} otherwise
+     */
     public boolean canBeEnabled(@NotNull Class<?> clazz) {
         try {
             return booleanCondition(clazz) && versionCondition(clazz);
