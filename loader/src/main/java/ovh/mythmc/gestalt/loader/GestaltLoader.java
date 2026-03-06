@@ -15,28 +15,81 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
 
-import ovh.mythmc.gestalt.loader.GestaltLoaderResponse.Warning;
+import ovh.mythmc.gestalt.loader.GestaltLoaderInitializationResponse.Warning;
 
+/**
+ * Abstract base class responsible for downloading, verifying, and loading the Gestalt JAR
+ * on the target platform.
+ *
+ * <p>Subclasses must implement the platform-specific methods:
+ * <ul>
+ *   <li>{@link #getDataDirectory()} - the directory in which the {@code libs/} folder is created</li>
+ *   <li>{@link #getLogger()} - the logger wrapper for status messages</li>
+ *   <li>{@link #isAvailable()} - whether Gestalt is already loaded on this platform</li>
+ *   <li>{@link #load()} - the platform-specific routine to load the downloaded JAR</li>
+ * </ul>
+ *
+ * <p>The full initialization flow is driven by {@link #initialize()}, which handles directory
+ * setup, version checking, downloading, and finally delegating to {@link #load()}.
+ *
+ * <p>Download URLs and checksum endpoints are read from a {@code gestalt.properties} resource
+ * bundled in the plugin JAR.
+ */
 public abstract class GestaltLoader {
 
+    /**
+     * Returns the root data directory of the plugin. The Gestalt JAR will be placed at
+     * {@code <dataDirectory>/libs/gestalt.jar}.
+     *
+     * @return the plugin data directory
+     */
     protected abstract Path getDataDirectory();
 
+    /**
+     * Returns the logger wrapper used to emit status messages during loading.
+     *
+     * @return the logger wrapper
+     */
     protected abstract GestaltLoggerWrapper getLogger();
 
+    /**
+     * Returns whether Gestalt is already available and loaded on this platform.
+     *
+     * <p>If {@code true}, {@link #initialize()} will return early without downloading or loading.
+     *
+     * @return {@code true} if Gestalt is already loaded
+     */
     protected abstract boolean isAvailable();
 
+    /**
+     * Performs the platform-specific routine to load the Gestalt JAR into the server.
+     * Called by {@link #initialize()} after the JAR has been verified to exist on disk.
+     */
     protected abstract void load();
 
-    public GestaltLoaderResponse initialize() {
+    /**
+     * Runs the full Gestalt initialization flow:
+     * <ol>
+     *   <li>Checks if Gestalt is already available and returns early if so.</li>
+     *   <li>Ensures the {@code libs/} directory exists.</li>
+     *   <li>Compares the local JAR checksum against the remote checksum and deletes
+     *       an outdated JAR if found.</li>
+     *   <li>Downloads the JAR if it is not present on disk.</li>
+     *   <li>Calls {@link #load()} to load the JAR into the server.</li>
+     * </ol>
+     *
+     * @return a {@link GestaltLoaderInitializationResponse} describing the outcome of the initialization
+     */
+    public GestaltLoaderInitializationResponse initialize() {
         if (isAvailable()) {
-            return GestaltLoaderResponse.alreadyAvailable(); // already loaded, nothing to do
+            return GestaltLoaderInitializationResponse.alreadyAvailable(); // already loaded, nothing to do
         }
 
         if (!setupGestaltDirectory()) {
-            return GestaltLoaderResponse.directoryUnavailable();
+            return GestaltLoaderInitializationResponse.directoryUnavailable();
         }
 
-        GestaltLoaderResponse response = GestaltLoaderResponse.success();
+        GestaltLoaderInitializationResponse response = GestaltLoaderInitializationResponse.success();
 
         if (!isUpToDate()) {
             if (!deleteJar()) {
@@ -47,7 +100,7 @@ public abstract class GestaltLoader {
         if (!Files.exists(getJarPath())) {
             if (!downloadGestalt()) {
                 getLogger().error("Gestalt could not be downloaded. Skipping load.");
-                return GestaltLoaderResponse.remoteUnavailable();
+                return GestaltLoaderInitializationResponse.remoteUnavailable();
             }
         }
 
@@ -55,15 +108,29 @@ public abstract class GestaltLoader {
         return response;
     }
 
+    /**
+     * Called when the loader should shut down.
+     */
     public void terminate() { 
         // reserved for future usage
     }
 
+    /**
+     * Returns the path where the Gestalt JAR is stored on disk.
+     * Defaults to {@code <dataDirectory>/libs/gestalt.jar}.
+     *
+     * @return the path to the Gestalt JAR
+     */
     protected Path getJarPath() {
         return getDataDirectory().resolve("libs").resolve("gestalt.jar");
     }
 
-    /** @deprecated Use {@link #getJarPath()} instead. */
+    /**
+     * Returns the string representation of the Gestalt JAR path.
+     *
+     * @return the Gestalt JAR path as a string
+     * @deprecated Use {@link #getJarPath()} instead.
+     */
     @Deprecated
     protected String getGestaltPath() {
         return getJarPath().toString();
