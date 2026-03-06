@@ -8,12 +8,13 @@ import org.jetbrains.annotations.NotNull;
 
 import io.papermc.paper.plugin.provider.classloader.ConfiguredPluginClassLoader;
 import io.papermc.paper.plugin.provider.classloader.PaperClassLoaderStorage;
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public class PaperPluginClassLoaderUtil {
 
-    private ConfiguredPluginClassLoader getPluginClassLoaderGroup(@NotNull Plugin plugin) {
+    private PaperPluginClassLoaderUtil() {
+    }
+
+    private static ConfiguredPluginClassLoader getPluginClassLoaderGroup(@NotNull Plugin plugin) {
         ConfiguredPluginClassLoader configuredPluginClassLoader = null;
         PaperClassLoaderStorage instance = PaperClassLoaderStorage.instance();
 
@@ -43,7 +44,7 @@ public class PaperPluginClassLoaderUtil {
         return configuredPluginClassLoader;
     }
 
-    private Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+    private static Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         try {
             return clazz.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
@@ -56,11 +57,11 @@ public class PaperPluginClassLoaderUtil {
         }
     }
 
-    public void mergeClassLoaders(@NotNull Plugin pluginToMerge, @NotNull Plugin destination) {
+    public static void mergeClassLoaders(@NotNull Plugin pluginToMerge, @NotNull Plugin destination) {
         getPluginClassLoaderGroup(destination).getGroup().add(getPluginClassLoaderGroup(pluginToMerge));
     }
 
-    public boolean isAccessible(@NotNull Plugin plugin, @NotNull String className) {
+    public static boolean isAccessible(@NotNull Plugin plugin, @NotNull String className) {
         try {
             getPluginClassLoaderGroup(plugin).loadClass(className, false, true, true);
             return true;

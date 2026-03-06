@@ -29,17 +29,17 @@ public abstract class GestaltLoggerWrapper {
 
             @Override
             public void info(String message) {
-                logger.info(message);
+                logger.info("[gestalt] " + message);
             }
 
             @Override
             public void warn(String message) {
-                logger.warning(message);
+                logger.warning("[gestalt] " + message);
             }
 
             @Override
             public void error(String message) {
-                logger.severe(message);
+                logger.severe("[gestalt] " + message);
             }
             
         };
@@ -55,17 +55,17 @@ public abstract class GestaltLoggerWrapper {
 
             @Override
             public void info(String message) {
-                componentLogger.info(message);
+                componentLogger.info("[gestalt] " + message);
             }
 
             @Override
             public void warn(String message) {
-                componentLogger.warn(message);
+                componentLogger.warn("[gestalt] " + message);
             }
 
             @Override
             public void error(String message) {
-                componentLogger.error(message);
+                componentLogger.error("[gestalt] " + message);
             }
             
         };

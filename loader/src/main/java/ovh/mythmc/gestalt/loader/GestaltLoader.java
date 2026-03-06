@@ -1,16 +1,19 @@
 package ovh.mythmc.gestalt.loader;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
-import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+import java.util.Objects;
 import java.util.Properties;
-
-import ovh.mythmc.gestalt.Gestalt;
+import java.util.Scanner;
 
 public abstract class GestaltLoader {
 
@@ -20,91 +23,180 @@ public abstract class GestaltLoader {
 
     protected abstract boolean isAvailable();
 
-    public void initialize() {
-        if (isAvailable()) // Gestalt is already initialized
-            return;
-
-        setupGestaltPath(); // Create directory
-
-        boolean load = true; // Whether the plugin should load
-        if (!Files.exists(Path.of(getGestaltPath())))
-            load = downloadGestalt();
-
-        if (load)
-            load();
-    }
-
     protected abstract void load();
 
-    public void terminate() {
-        if (!Gestalt.get().isAutoUpdate())
-            return;
+    // -------------------------------------------------------------------------
+    // Public API
+    // -------------------------------------------------------------------------
 
+    public void initialize() {
+        if (isAvailable()) {
+            return; // already loaded, nothing to do
+        }
+
+        setupGestaltDirectory();
+
+        if (!isUpToDate()) {
+            getLogger().info("Updating Gestalt...");
+            deleteJar();
+        }
+
+        if (!Files.exists(getJarPath())) {
+            if (!downloadGestalt()) {
+                getLogger().error("Gestalt could not be downloaded. Skipping load.");
+                return;
+            }
+        }
+
+        load();
+    }
+
+    public void terminate() { }
+
+    // -------------------------------------------------------------------------
+    // Path helpers
+    // -------------------------------------------------------------------------
+
+    protected Path getJarPath() {
+        return getDataDirectory().resolve("libs").resolve("gestalt.jar");
+    }
+
+    /** @deprecated Use {@link #getJarPath()} instead. */
+    @Deprecated
+    protected String getGestaltPath() {
+        return getJarPath().toString();
+    }
+
+    // -------------------------------------------------------------------------
+    // Internal lifecycle
+    // -------------------------------------------------------------------------
+
+    private void setupGestaltDirectory() {
         try {
-            // Get class loader and close with reflection
-            URLClassLoader loader = (URLClassLoader) Gestalt.get().getClass().getClassLoader();
-            loader.close();
-
-            // Delete file
-            Files.deleteIfExists(Path.of(getGestaltPath()));
-        } catch (Throwable t) {
-            getLogger().error("Error while terminating the instance!");
-            t.printStackTrace(System.err);
+            Files.createDirectories(getJarPath().getParent());
+        } catch (IOException e) {
+            getLogger().error("Could not create Gestalt directory (permission issue?)");
+            e.printStackTrace(System.err);
         }
     }
 
-    protected String getGestaltPath() {
-        return getDataDirectory() + File.separator + "libs" + File.separator + "gestalt.jar";
+    private void deleteJar() {
+        try {
+            Files.deleteIfExists(getJarPath());
+        } catch (IOException e) {
+            getLogger().error("Could not delete outdated Gestalt JAR:");
+            e.printStackTrace(System.err);
+        }
     }
 
-    private Properties getProperties() {
-        Properties properties = new Properties();
-        try {
-            properties.load(getClass().getClassLoader().getResourceAsStream("gestalt.properties"));
+    // -------------------------------------------------------------------------
+    // Update check
+    // -------------------------------------------------------------------------
+
+    private boolean isUpToDate() {
+        final String localChecksum = computeJarChecksum();
+        final String remoteChecksum = fetchRemoteChecksum();
+
+        getLogger().verbose("Local JAR checksum:  " + localChecksum);
+        getLogger().verbose("Remote JAR checksum: " + remoteChecksum);
+
+        return Objects.equals(localChecksum, remoteChecksum);
+    }
+
+    private String fetchRemoteChecksum() {
+        final Properties properties = loadProperties();
+
+        for (int i = 1; i <= 10; i++) {
+            final String url = properties.getProperty("checksum." + i);
+            if (url == null) continue;
+
+            try {
+                final URLConnection connection = URI.create(url).toURL().openConnection();
+                try (Scanner scanner = new Scanner(connection.getInputStream())) {
+                    return scanner.next();
+                }
+            } catch (IOException e) {
+                getLogger().error("Could not fetch remote checksum from server " + i
+                        + " (server down? try switching DNS servers)");
+                if (i < 10) {
+                    getLogger().info("Retrying with server " + (i + 1) + "...");
+                }
+            }
+        }
+
+        // Assume up-to-date if all remote checks fail
+        return computeJarChecksum();
+    }
+
+    // -------------------------------------------------------------------------
+    // Download
+    // -------------------------------------------------------------------------
+
+    private boolean downloadGestalt() {
+        getLogger().verbose("Downloading gestalt...");
+        final Properties properties = loadProperties();
+
+        for (int i = 1; i <= 10; i++) {
+            final String url = properties.getProperty("server." + i);
+            if (url == null) continue;
+
+            try {
+                final long bytes = downloadFile(url, getJarPath());
+                getLogger().verbose("Downloaded " + (bytes / 1_000) + " KB from server " + i);
+                return true;
+            } catch (IOException e) {
+                getLogger().error("Could not download from server " + i
+                        + " (server down? try switching DNS servers)");
+                if (i < 10) {
+                    getLogger().info("Retrying with server " + (i + 1) + "...");
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static long downloadFile(String url, Path destination) throws IOException {
+        try (InputStream in = URI.create(url).toURL().openStream()) {
+            return Files.copy(in, destination);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Checksum
+    // -------------------------------------------------------------------------
+
+    private String computeJarChecksum() {
+        if (!Files.exists(getJarPath())) {
+            return "";
+        }
+
+        try (FileInputStream fis = new FileInputStream(getJarPath().toFile());
+             DigestInputStream dis = new DigestInputStream(fis, MessageDigest.getInstance("MD5"))) {
+
+            dis.transferTo(OutputStream.nullOutputStream());
+            return HexFormat.of().formatHex(dis.getMessageDigest().digest());
+
+        } catch (Exception e) {
+            getLogger().error("Could not compute JAR checksum:");
+            e.printStackTrace(System.err);
+            return "";
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Properties
+    // -------------------------------------------------------------------------
+
+    private Properties loadProperties() {
+        final Properties properties = new Properties();
+        try (InputStream stream = getClass().getClassLoader().getResourceAsStream("gestalt.properties")) {
+            properties.load(stream);
         } catch (IOException e) {
-            getLogger().error("Gestalt properties file not accessible! (shaded?)");
+            getLogger().error("Could not read gestalt.properties (was it shaded correctly?)");
             e.printStackTrace(System.err);
         }
         return properties;
     }
 
-    private void setupGestaltPath() {
-        try {
-            Files.createDirectories(Path.of(getGestaltPath()).getParent());
-        } catch (IOException e) {
-            getLogger().error("Gestalt path cannot be created! (permission issue?)");
-            e.printStackTrace(System.err);
-        }
-    }
-
-    private boolean downloadGestalt() {
-        boolean downloaded = false;
-
-        getLogger().verbose("Downloading gestalt (event-based library for managing features)...");
-        for (int i = 1; i <= 10; i++) { // Up to 10 download links
-            String key = "server." + i;
-            String url = getProperties().getProperty(key);
-
-            if (url != null) {
-                try {
-                    long bytes = download(url, getGestaltPath());
-                    getLogger().verbose("Downloaded " + (bytes / 1000) + " KBs from server " + i);
-                    downloaded = true;
-                    break;
-                } catch (IOException e) {
-                    getLogger().error("Couldn't fetch gestalt! (server down? / switch DNS servers?)");
-                    getLogger().info("Retrying with server " + (i+1) + "...");
-                }
-            }
-        }
-
-        return downloaded;
-    }
-
-    private static long download(String url, String fileName) throws IOException {
-        try (InputStream in = URI.create(url).toURL().openStream()) {
-            return Files.copy(in, Paths.get(fileName));
-        }
-    }
-    
 }
