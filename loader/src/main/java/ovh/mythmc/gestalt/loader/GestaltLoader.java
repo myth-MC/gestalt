@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
 
+import ovh.mythmc.gestalt.loader.GestaltLoaderResponse.Warning;
+
 public abstract class GestaltLoader {
 
     protected abstract Path getDataDirectory();
@@ -25,37 +27,37 @@ public abstract class GestaltLoader {
 
     protected abstract void load();
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    public void initialize() {
+    public GestaltLoaderResponse initialize() {
         if (isAvailable()) {
-            return; // already loaded, nothing to do
+            return GestaltLoaderResponse.alreadyAvailable(); // already loaded, nothing to do
         }
 
-        setupGestaltDirectory();
+        if (!setupGestaltDirectory()) {
+            return GestaltLoaderResponse.directoryUnavailable();
+        }
+
+        GestaltLoaderResponse response = GestaltLoaderResponse.success();
 
         if (!isUpToDate()) {
-            getLogger().info("Updating Gestalt...");
-            deleteJar();
+            if (!deleteJar()) {
+                response.warnings(Warning.OUTDATED);
+            }
         }
 
         if (!Files.exists(getJarPath())) {
             if (!downloadGestalt()) {
                 getLogger().error("Gestalt could not be downloaded. Skipping load.");
-                return;
+                return GestaltLoaderResponse.remoteUnavailable();
             }
         }
 
         load();
+        return response;
     }
 
-    public void terminate() { }
-
-    // -------------------------------------------------------------------------
-    // Path helpers
-    // -------------------------------------------------------------------------
+    public void terminate() { 
+        // reserved for future usage
+    }
 
     protected Path getJarPath() {
         return getDataDirectory().resolve("libs").resolve("gestalt.jar");
@@ -67,31 +69,29 @@ public abstract class GestaltLoader {
         return getJarPath().toString();
     }
 
-    // -------------------------------------------------------------------------
-    // Internal lifecycle
-    // -------------------------------------------------------------------------
-
-    private void setupGestaltDirectory() {
+    private boolean setupGestaltDirectory() {
         try {
             Files.createDirectories(getJarPath().getParent());
+            return true;
         } catch (IOException e) {
             getLogger().error("Could not create Gestalt directory (permission issue?)");
             e.printStackTrace(System.err);
         }
+        
+        return false;
     }
 
-    private void deleteJar() {
+    private boolean deleteJar() {
         try {
             Files.deleteIfExists(getJarPath());
+            return true;
         } catch (IOException e) {
             getLogger().error("Could not delete outdated Gestalt JAR:");
             e.printStackTrace(System.err);
         }
-    }
 
-    // -------------------------------------------------------------------------
-    // Update check
-    // -------------------------------------------------------------------------
+        return false;
+    }
 
     private boolean isUpToDate() {
         final String localChecksum = computeJarChecksum();
@@ -128,10 +128,6 @@ public abstract class GestaltLoader {
         return computeJarChecksum();
     }
 
-    // -------------------------------------------------------------------------
-    // Download
-    // -------------------------------------------------------------------------
-
     private boolean downloadGestalt() {
         getLogger().verbose("Downloading gestalt...");
         final Properties properties = loadProperties();
@@ -142,7 +138,7 @@ public abstract class GestaltLoader {
 
             try {
                 final long bytes = downloadFile(url, getJarPath());
-                getLogger().verbose("Downloaded " + (bytes / 1_000) + " KB from server " + i);
+                getLogger().verbose("Downloaded " + (bytes / 1_000) + " KBs from server " + i);
                 return true;
             } catch (IOException e) {
                 getLogger().error("Could not download from server " + i
@@ -162,10 +158,6 @@ public abstract class GestaltLoader {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Checksum
-    // -------------------------------------------------------------------------
-
     private String computeJarChecksum() {
         if (!Files.exists(getJarPath())) {
             return "";
@@ -176,7 +168,6 @@ public abstract class GestaltLoader {
 
             dis.transferTo(OutputStream.nullOutputStream());
             return HexFormat.of().formatHex(dis.getMessageDigest().digest());
-
         } catch (Exception e) {
             getLogger().error("Could not compute JAR checksum:");
             e.printStackTrace(System.err);
@@ -184,16 +175,12 @@ public abstract class GestaltLoader {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Properties
-    // -------------------------------------------------------------------------
-
     private Properties loadProperties() {
         final Properties properties = new Properties();
         try (InputStream stream = getClass().getClassLoader().getResourceAsStream("gestalt.properties")) {
             properties.load(stream);
         } catch (IOException e) {
-            getLogger().error("Could not read gestalt.properties (was it shaded correctly?)");
+            getLogger().error("Could not read gestalt.properties (was it shaded?)");
             e.printStackTrace(System.err);
         }
         return properties;
