@@ -8,7 +8,7 @@ import ovh.mythmc.gestalt.Gestalt;
 public final class BukkitGestalt extends Gestalt {
 
     protected BukkitGestalt(JavaPlugin plugin) {
-        super(Bukkit.getServer().getVersion(), plugin.getConfig().getBoolean("autoUpdate"));
+        super(Bukkit.getServer().getVersion());
     }
     
 }

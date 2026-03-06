@@ -36,7 +36,6 @@ import ovh.mythmc.gestalt.util.MethodUtil;
 public abstract class Gestalt {
 
     private final String serverVersion;
-    private final boolean autoUpdate; // Used by GestaltLoader
     private final FeatureConditionProcessor conditionProcessor = new FeatureConditionProcessor(this);
     private final FeatureListenerProcessor listenerProcessor = new FeatureListenerProcessor(this);
     private final FeatureConstructorParamsRegistry constructorParamsRegistry = new FeatureConstructorParamsRegistry();
@@ -51,15 +50,6 @@ public abstract class Gestalt {
      */
     public String getServerVersion() {
         return this.serverVersion;
-    }
-
-    /**
-     * Returns whether Gestalt should automatically update features via the loader.
-     *
-     * @return {@code true} if auto-update is enabled
-     */
-    public boolean isAutoUpdate() {
-        return this.autoUpdate;
     }
 
     /**
@@ -118,9 +108,8 @@ public abstract class Gestalt {
      * @param serverVersion the server version string, used for version-based conditions
      * @param autoUpdate    whether the loader should auto-update features
      */
-    protected Gestalt(String serverVersion, boolean autoUpdate) {
+    protected Gestalt(String serverVersion) {
         this.serverVersion = serverVersion;
-        this.autoUpdate = autoUpdate;
     }
 
     /**
