@@ -1,0 +1,6 @@
+name: gestalt-test
+authors: [ myth-MC, U8092 ]
+version: '${project.parent.version}'
+api-version: 1.13
+folia-supported: true
+main: ovh.mythmc.gestalt.bukkit.test.GestaltBukkitTest
