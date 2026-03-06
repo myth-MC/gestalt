@@ -6,11 +6,13 @@
     <parent>
           <groupId>ovh.mythmc</groupId>
           <artifactId>gestalt</artifactId>
-          <version>0.3.0</version>
+          <version>0.3.1</version>
     </parent>
 
     <groupId>ovh.mythmc</groupId>
     <artifactId>gestalt-loader</artifactId>
+
+    <name>gestalt-loader</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -38,16 +40,16 @@
         </dependency>
         
         <dependency>
-           <groupId>org.spigotmc</groupId>
-           <artifactId>spigot-api</artifactId>
-           <version>1.19.4-R0.1-SNAPSHOT</version>
-           <scope>provided</scope>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.19.4-R0.1-20230607.155743-88</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.19.4-R0.1-SNAPSHOT</version>
+            <version>1.19.4-R0.1-20230608.201059-104</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
